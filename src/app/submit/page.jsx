@@ -110,7 +110,7 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig }) {
   }, [setVal]);
 
   return (
-    <div className="w-[500px]">
+    <div className="">
       <section className="text-center">
         <Input
           id="movie"
