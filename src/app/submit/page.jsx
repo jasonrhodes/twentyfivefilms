@@ -55,7 +55,7 @@ function Input({ value, label, id, onChange, ref, selectedIndex, setSelectedInde
   }
 
   return (
-    <div className="mb-10">
+    <div className="mb-5">
       <div className="pb-1 text-gray-500 text-sm"><label htmlFor={id}>{label}</label></div>
       <div>
         <input 
@@ -108,17 +108,17 @@ function MovieItem({ movie, onSelect, onRemove, imageConfig, selected, dragging,
   };
 
   const actionStyle = onSelect ? 'cursor-pointer' : 'cursor-move'
-  const backgroundColor = dropping ? 'bg-indigo-100 border-dashed border-indigo-300 color-indigo-300 border-4 text-opacity-50' : dragging ? 'opacity-90 bg-gray-100 scale-95' : deleteStyle ? 'bg-red-100' : selected ? 'sm:bg-indigo-100'  : 'hover:bg-indigo-100'
+  const backgroundColor = dropping ? 'bg-indigo-100 dark:bg-blue-900 border-dashed border-indigo-300 dark:border-blue-700 color-indigo-300 dark:color-blue-700 border-4 text-opacity-50' : dragging ? 'opacity-90 bg-gray-100 dark:bg-gray-800 scale-95' : deleteStyle ? 'bg-red-100 dark:bg-red-800' : selected ? 'sm:bg-indigo-100 dark:sm:bg-blue-900'  : 'hover:bg-indigo-100 dark:hover:bg-blue-900'
 
   return (
     <div className={`flex items-center mb-4 ${actionStyle} ${backgroundColor} sm:pr-2`} onClick={() => onSelect ? onSelect(movie) : null} ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <div className="h-24 bg-gray-200 flex justify-center align-middle items-center" style={{flex: '0 0 4rem'}}>
-        {dropping ? <span className="bg-indigo-100 w-full h-full"></span> :
+      <div className="h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center" style={{flex: '0 0 4rem'}}>
+        {dropping ? <span className="bg-indigo-100 dark:bg-blue-900 w-full h-full"></span> :
             imageUrl ? <img className="w-full h-full" src={imageUrl}/> :
-                <span className="text-2xl text-gray-400">?</span>
+                <span className="text-2xl text-gray-400 dark:text-gray-600">?</span>
         }
       </div>
-      <div className="pr-3 pl-3 w-120 flex-auto" style={{maxWidth: 'calc(100% - 4rem - )'}}>
+      <div className="pr-3 pl-3 w-full flex-auto">
         {dropping ?
             <b>Drop Here</b> :
             <>
@@ -130,7 +130,7 @@ function MovieItem({ movie, onSelect, onRemove, imageConfig, selected, dragging,
             </>}
       </div>
       {onRemove && !dropping ? (
-          <div className="cursor-pointer bg-red-100 hover:bg-red-700 pr-2 pl-2 rounded-2xl hover:text-white deleteButton" onMouseEnter={() => setDeleteStyle(true)} onMouseLeave={() => setDeleteStyle(false)} onClick={() => onRemove(movie)}>
+          <div className="cursor-pointer bg-red-100 dark:bg-red-900 hover:bg-red-700 dark:hover:bg-red-700 pr-2 pl-2 rounded-2xl hover:text-white dark:text-white deleteButton" onMouseEnter={() => setDeleteStyle(true)} onMouseLeave={() => setDeleteStyle(false)} onClick={() => onRemove(movie)}>
             <span className="text-2xl leading-none pointer-events-none">-</span>
           </div>
       ) : null}
@@ -253,7 +253,7 @@ function FavoriteMovieList({favorites, setFavorites, onFavoriteRemove, setShowMo
             items={favorites}
             strategy={verticalListSortingStrategy}
         >
-          {favorites.length > 0 && <div className="bg-gray-100 border-2 border-gray-300 border-dashed p-3 mb-3">
+          {favorites.length > 0 && <div className="bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 mb-3">
             <div className="font-bold text-lg my-2">Top 10 <span className="text-gray-500 text-sm">(Unranked, equally weighted)</span></div>
             {favorites.filter((m, i) => i < 10).map((movie) => <Draggable key={movie.id} id={movie.id}>
                   <MovieItem key={`${movie.title}-${movie.id}`} imageConfig={imageConfig} movie={movie}
@@ -269,7 +269,7 @@ function FavoriteMovieList({favorites, setFavorites, onFavoriteRemove, setShowMo
                 </Draggable>
             )}
           </div>}
-          {favorites.length > 25 && <div className="opacity-50 bg-gray-100 border-2 border-gray-300 border-dashed p-3 mb-3">
+          {favorites.length > 25 && <div className="opacity-50 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 mb-3">
             <div className="font-bold text-lg my-2">Uncounted</div>
             {favorites.filter((m, i) => i > 24).map((movie) => <Draggable key={movie.id} id={movie.id}>
                   <MovieItem key={`${movie.title}-${movie.id}`} imageConfig={imageConfig} movie={movie}
@@ -293,6 +293,8 @@ export default function SubmitFilms() {
   const [showModal, setShowModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [imageConfig, setImageConfig] = useState(null);
+  const [alert, setAlert] = useState({})
+  const [alertVisible, setAlertVisible] = useState(false)
 
   useEffect(() => {
     async function doFetch() {
@@ -303,23 +305,35 @@ export default function SubmitFilms() {
     doFetch();
   }, [setImageConfig]);
 
+  const resetAlert = (newAlert) => {
+    setAlert(newAlert)
+    setAlertVisible(true)
+    window.setTimeout(() => setAlertVisible(false),2000)
+  }
+
   const onFavoriteSelect = useCallback((movie, enterSelect = false) => {
     if (favorites.some(fav => fav.id === movie.id)) {
-      window.alert('Movie is already on list')
+      resetAlert({style: 'warning', message: `${movie.title} is already on list`})
     } else {
       setFavorites([...favorites, movie]);
       setShowModal(false);
+      resetAlert({style: 'success', message: `${movie.title} added to the list`})
     }
   }, [favorites, setFavorites, setShowModal]);
 
   const onFavoriteRemove = useCallback((movie) => {
     const updated = favorites.filter((f) => f.id !== movie.id);
     setFavorites(updated);
+    resetAlert({style: 'danger', message: `${movie.title} removed from list`})
   }, [favorites, setFavorites]);
 
-  return showModal ?
-      <ChooseMovieModal onSelect={onFavoriteSelect} imageConfig={imageConfig} setShowModal={setShowModal}/>
-   : <FavoriteMovieList favorites={favorites} setFavorites={setFavorites} onFavoriteRemove={onFavoriteRemove} setShowModal={setShowModal} imageConfig={imageConfig} />;
+  return <>
+    <AlertBox alert={alert} visible={alertVisible} />
+    {showModal ?
+        <ChooseMovieModal onSelect={onFavoriteSelect} imageConfig={imageConfig} setShowModal={setShowModal}/>
+     : <FavoriteMovieList favorites={favorites} setFavorites={setFavorites} onFavoriteRemove={onFavoriteRemove} setShowModal={setShowModal} imageConfig={imageConfig} />
+    }
+  </>;
 }
 
 function Draggable(props) {
@@ -344,3 +358,11 @@ function keyCodeListener(code, func) {
   }
 }
 
+function AlertBox({alert: {message, style}, visible}) {
+  const styleClass = style === 'success' ? 'bg-green-300 dark:bg-green-800 border-green-500 dark:green-yellow-600' : style === 'warning' ? 'bg-yellow-300 dark:bg-yellow-800 border-yellow-500 dark:border-yellow-600' : style === 'danger' ? 'bg-red-300 dark:bg-red-800 border-red-500 dark:border-red-600' : 'bg-white border-gray-500 dark:bg-black'
+  const transitionStyle = visible ? {transition: 'top 0.5s ease 0s', top: '-2px'} : {transition: 'top 0.2s ease 0s'}
+  return <div className={`border-2 p-2 fixed h-[50px] top-[-50px] ${styleClass}`} style={transitionStyle}>
+    {message}
+  </div>
+
+}
