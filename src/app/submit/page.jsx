@@ -35,16 +35,25 @@ class MyMouserSensor extends MouseSensor {
   ];
 }
 
-function MovieResultList({ movies, onSelect, imageConfig, selectedIndex, setSelectedIndex }) {
+function MovieResultList({
+  movies, 
+  onSelect, 
+  imageConfig, 
+  selectedIndex, 
+  setSelectedIndex,
+  disableHoverSelect
+}) {
   const handleHover = useCallback((e, index) => {
-    setSelectedIndex(index);
+    if (!disableHoverSelect) {
+      setSelectedIndex(index);
+    }
   });
 
   return (
     <div>
         <ul>
           {movies.map((movie, i) => (
-            <li key={`${movie.title}-${movie.id}`} onMouseOver={(e) => handleHover(e, i)}>
+            <li key={`${movie.title}-${movie.id}`} onMouseEnter={(e) => handleHover(e, i)}>
               <MovieItem movie={movie} onSelect={onSelect} imageConfig={imageConfig} selected={i === selectedIndex}/>
             </li>
           ))}
@@ -127,6 +136,7 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
   const [val, setVal] = useState(initialValue);
   const [movies, setMovies] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [disableHoverSelect, setDisableHoverSelect] = useState(false);
   const ref = useRef()
 
   const onMovieChange = useCallback((pattern) => {
@@ -138,17 +148,22 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
   const onKeyDown = useCallback((event) => {
     if (event.code === 'ArrowUp') {
       event.preventDefault();
+      setDisableHoverSelect(true);
       setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1)
     } else if (event.code === 'ArrowDown') {
       event.preventDefault();
+      setDisableHoverSelect(true);
       setSelectedIndex(selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1)
     } else if (event.code === 'Enter') {
       event.preventDefault();
+      setDisableHoverSelect(false);
       onSelect(movies[selectedIndex], true)
     } else if (event.code === 'Escape') {
       event.preventDefault();
+      setDisableHoverSelect(false);
       cancelSearch();
     } else {
+      setDisableHoverSelect(false);
       setSelectedIndex(0);
     }
   });
@@ -198,6 +213,7 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
           imageConfig={imageConfig} 
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
+          disableHoverSelect={disableHoverSelect}
         />
       </section>
     </div>
