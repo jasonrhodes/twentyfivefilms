@@ -4,30 +4,12 @@ import { useCallback } from 'react';
 
 export function Input(options) {
   const noop = () => null;
-  const { value, label, id, onChange = noop, selectedIndex = 0, setSelectedIndex = noop, ref = null, movies = [], onSelect = noop, ...rest } = options;
+  const { value, label, id, onChange = noop, ref = null, onKeyDown = noop, ...rest } = options;
 
   const internalOnChange = useCallback((e) => {
     const updatedValue = e.currentTarget.value;
     onChange(updatedValue);
   }, [onChange]);
-
-  const keyNavigation = (event) => {
-    console.log('key press', event.code);
-    if (event.code === 'ArrowUp') {
-      event.preventDefault()
-      setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1)
-    } else if (event.code === 'ArrowDown') {
-      event.preventDefault()
-      setSelectedIndex(selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1)
-    } else if (event.code === 'Enter') {
-      console.log('LOG: pressed "ENTER"')
-      event.preventDefault()
-      onSelect(movies[selectedIndex], true)
-    } else {
-      console.log('LOG: else branch');
-      setSelectedIndex(0)
-    }
-  }
 
   return (
     <div className="mb-10">
@@ -40,7 +22,7 @@ export function Input(options) {
           onChange={internalOnChange} 
           id={id}
           ref={ref}
-          onKeyDown={e => keyNavigation(e)}
+          onKeyDown={onKeyDown}
         />
       </div>
     </div>

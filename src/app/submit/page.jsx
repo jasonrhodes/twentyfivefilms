@@ -35,50 +35,16 @@ class MyMouserSensor extends MouseSensor {
   ];
 }
 
-// function Input({ value, label, id, onChange, ref, selectedIndex, setSelectedIndex, movies, onSelect }) {
-//   const internalOnChange = useCallback((e) => {
-//     const updatedValue = e.currentTarget.value;
-//     onChange(updatedValue);
-//   }, [onChange]);
+function MovieResultList({ movies, onSelect, imageConfig, selectedIndex, setSelectedIndex }) {
+  const handleHover = useCallback((e, index) => {
+    setSelectedIndex(index);
+  });
 
-//   const keyNavigation = (event) => {
-//     if (event.code === 'ArrowUp') {
-//       event.preventDefault()
-//       setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1)
-//     } else if (event.code === 'ArrowDown') {
-//       event.preventDefault()
-//       setSelectedIndex(selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1)
-//     } else if (event.code === 'Enter') {
-//       event.preventDefault()
-//       onSelect(movies[selectedIndex], true)
-//     } else {
-//       setSelectedIndex(0)
-//     }
-//   }
-
-//   return (
-//     <div className="mb-5">
-//       <div className="pb-1 text-gray-500 text-sm"><label htmlFor={id}>{label}</label></div>
-//       <div>
-//         <input 
-//           className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//           value={value} 
-//           onChange={internalOnChange} 
-//           id={id}
-//           ref={ref}
-//           onKeyDown={e => keyNavigation(e)}
-//         />
-//       </div>
-//     </div>
-//   )
-// }
-
-function MovieResultList({ movies, onSelect, imageConfig, selectedIndex }) {
   return (
     <div>
         <ul>
           {movies.map((movie, i) => (
-            <li key={`${movie.title}-${movie.id}`}>
+            <li key={`${movie.title}-${movie.id}`} onMouseOver={(e) => handleHover(e, i)}>
               <MovieItem movie={movie} onSelect={onSelect} imageConfig={imageConfig} selected={i === selectedIndex}/>
             </li>
           ))}
@@ -87,8 +53,15 @@ function MovieResultList({ movies, onSelect, imageConfig, selectedIndex }) {
   )
 }
 
-function MovieItem({ movie, onSelect, onRemove, imageConfig, selected, dragging, dropping}) {
-  const [deleteStyle, setDeleteStyle] = useState(false)
+function MovieItem({ movie, onSelect, onRemove, imageConfig, selected, dragging, dropping }) {
+  const [deleteStyle, setDeleteStyle] = useState(false);
+  const scrollRef = useRef();
+
+  useEffect(() => {
+    if (selected) {
+      scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selected])
 
   const imageUrl = useMemo(() => movie.poster_path ? buildImageUrl({
     config: imageConfig,
@@ -110,11 +83,19 @@ function MovieItem({ movie, onSelect, onRemove, imageConfig, selected, dragging,
   };
 
   const actionStyle = onSelect ? 'cursor-pointer' : 'cursor-move'
-  const backgroundColor = dropping ? 'bg-indigo-100 dark:bg-blue-900 border-dashed border-indigo-300 dark:border-blue-700 color-indigo-300 dark:color-blue-700 border-4 text-opacity-50' : dragging ? 'opacity-90 bg-gray-100 dark:bg-gray-800 scale-95' : deleteStyle ? 'bg-red-100 dark:bg-red-800' : selected ? 'sm:bg-indigo-100 dark:sm:bg-blue-900'  : 'hover:bg-indigo-100 dark:hover:bg-blue-900'
+  const backgroundColor = dropping 
+    ? 'bg-indigo-100 dark:bg-blue-900 border-dashed border-indigo-300 dark:border-blue-700 color-indigo-300 dark:color-blue-700 border-4 text-opacity-50'
+    : dragging
+      ? 'opacity-90 bg-gray-100 dark:bg-gray-800 scale-95'
+      : deleteStyle 
+        ? 'bg-red-100 dark:bg-red-800'
+        : selected 
+          ? 'sm:bg-indigo-100 dark:sm:bg-blue-900'
+          : '';
 
   return (
     <div className={`flex items-center mb-4 ${actionStyle} ${backgroundColor} sm:pr-2`} onClick={() => onSelect ? onSelect(movie) : null} ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <div className="h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center" style={{flex: '0 0 4rem'}}>
+      <div ref={scrollRef} className="h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center" style={{flex: '0 0 4rem'}}>
         {dropping ? <span className="bg-indigo-100 dark:bg-blue-900 w-full h-full"></span> :
             imageUrl ? <img className="w-full h-full" src={imageUrl}/> :
                 <span className="text-2xl text-gray-400 dark:text-gray-600">?</span>
@@ -140,6 +121,8 @@ function MovieItem({ movie, onSelect, onRemove, imageConfig, selected, dragging,
   )
 }
 
+
+
 function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowModal }) {
   const [val, setVal] = useState(initialValue);
   const [movies, setMovies] = useState([]);
@@ -151,6 +134,24 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
   }, [setVal]);
 
   const cancelSearch = useCallback(() => setShowModal(false), [setShowModal]);
+
+  const onKeyDown = useCallback((event) => {
+    if (event.code === 'ArrowUp') {
+      event.preventDefault();
+      setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1)
+    } else if (event.code === 'ArrowDown') {
+      event.preventDefault();
+      setSelectedIndex(selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1)
+    } else if (event.code === 'Enter') {
+      event.preventDefault();
+      onSelect(movies[selectedIndex], true)
+    } else if (event.code === 'Escape') {
+      event.preventDefault();
+      cancelSearch();
+    } else {
+      setSelectedIndex(0);
+    }
+  });
 
   useEffect(() => {
     if (ref?.current) {
@@ -175,8 +176,6 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
     return () => (useThisResult = false);
   }, [val])
 
-  useEffect(() => keyCodeListener('Escape', cancelSearch), [cancelSearch])
-
   return (
     <div className="w-full">
       <div className="pt-4 pb-6 flex justify-end">
@@ -189,14 +188,17 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
           onChange={onMovieChange}
           value={val}
           ref={ref}
-          selectedIndex={selectedIndex}
-          setSelectedIndex={setSelectedIndex}
-          onSelect={onSelect}
-          movies={movies}
+          onKeyDown={onKeyDown}
         />
       </section>
       <section>
-        <MovieResultList movies={movies} onSelect={onSelect} imageConfig={imageConfig} selectedIndex={selectedIndex}/>
+        <MovieResultList
+          movies={movies}
+          onSelect={onSelect}
+          imageConfig={imageConfig} 
+          selectedIndex={selectedIndex}
+          setSelectedIndex={setSelectedIndex}
+        />
       </section>
     </div>
   )
@@ -316,7 +318,6 @@ export default function SubmitFilms() {
   }
 
   const onFavoriteSelect = useCallback((movie, enterSelect = false) => {
-    console.log('LOG: OnFavoriteSelect', movie);
     if (favorites.some(fav => fav.id === movie.id)) {
       resetAlert({style: 'warning', message: `${movie.title} is already on list`})
     } else {
