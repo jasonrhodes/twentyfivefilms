@@ -4,6 +4,7 @@ import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import { lookupMovie } from '@/lib/lookupMovie';
 import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { buildImageUrl } from '@/lib/buildImageUrl';
+import { Input } from '@/components/input';
 import {CSS} from '@dnd-kit/utilities';
 import {
   DndContext,
@@ -24,6 +25,7 @@ import {
   verticalListSortingStrategy,
   sortableKeyboardCoordinates
 } from '@dnd-kit/sortable';
+import { IconPlus, IconX } from '@tabler/icons-react';
 class MyMouserSensor extends MouseSensor {
   static activators = [
     {
@@ -33,43 +35,43 @@ class MyMouserSensor extends MouseSensor {
   ];
 }
 
-function Input({ value, label, id, onChange, ref, selectedIndex, setSelectedIndex, movies, onSelect }) {
-  const internalOnChange = useCallback((e) => {
-    const updatedValue = e.currentTarget.value;
-    onChange(updatedValue);
-  }, [onChange]);
+// function Input({ value, label, id, onChange, ref, selectedIndex, setSelectedIndex, movies, onSelect }) {
+//   const internalOnChange = useCallback((e) => {
+//     const updatedValue = e.currentTarget.value;
+//     onChange(updatedValue);
+//   }, [onChange]);
 
-  const keyNavigation = (event) => {
-    if (event.code === 'ArrowUp') {
-      event.preventDefault()
-      setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1)
-    } else if (event.code === 'ArrowDown') {
-      event.preventDefault()
-      setSelectedIndex(selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1)
-    } else if (event.code === 'Enter') {
-      event.preventDefault()
-      onSelect(movies[selectedIndex], true)
-    } else {
-      setSelectedIndex(0)
-    }
-  }
+//   const keyNavigation = (event) => {
+//     if (event.code === 'ArrowUp') {
+//       event.preventDefault()
+//       setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1)
+//     } else if (event.code === 'ArrowDown') {
+//       event.preventDefault()
+//       setSelectedIndex(selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1)
+//     } else if (event.code === 'Enter') {
+//       event.preventDefault()
+//       onSelect(movies[selectedIndex], true)
+//     } else {
+//       setSelectedIndex(0)
+//     }
+//   }
 
-  return (
-    <div className="mb-5">
-      <div className="pb-1 text-gray-500 text-sm"><label htmlFor={id}>{label}</label></div>
-      <div>
-        <input 
-          className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          value={value} 
-          onChange={internalOnChange} 
-          id={id}
-          ref={ref}
-          onKeyDown={e => keyNavigation(e)}
-        />
-      </div>
-    </div>
-  )
-}
+//   return (
+//     <div className="mb-5">
+//       <div className="pb-1 text-gray-500 text-sm"><label htmlFor={id}>{label}</label></div>
+//       <div>
+//         <input 
+//           className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+//           value={value} 
+//           onChange={internalOnChange} 
+//           id={id}
+//           ref={ref}
+//           onKeyDown={e => keyNavigation(e)}
+//         />
+//       </div>
+//     </div>
+//   )
+// }
 
 function MovieResultList({ movies, onSelect, imageConfig, selectedIndex }) {
   return (
@@ -148,6 +150,8 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
     setVal(pattern);
   }, [setVal]);
 
+  const cancelSearch = useCallback(() => setShowModal(false), [setShowModal]);
+
   useEffect(() => {
     if (ref?.current) {
       ref.current.focus();
@@ -171,30 +175,30 @@ function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowMod
     return () => (useThisResult = false);
   }, [val])
 
-  useEffect(() => keyCodeListener('Escape', () => setShowModal(false)),[])
+  useEffect(() => keyCodeListener('Escape', cancelSearch), [cancelSearch])
 
   return (
-      <div className="w-full">
-        <div className="pt-4 pb-6 text-center">
-          <button className="p-2" onClick={() => setShowModal(false)}>{"<- Back to List"}</button>
-        </div>
-        <section className="text-center">
-          <Input
-              id="movie"
-              label="Search for a movie"
-              onChange={onMovieChange}
-              value={val}
-              ref={ref}
-              selectedIndex={selectedIndex}
-              setSelectedIndex={setSelectedIndex}
-              onSelect={onSelect}
-              movies={movies}
-          />
-        </section>
-        <section>
-          <MovieResultList movies={movies} onSelect={onSelect} imageConfig={imageConfig} selectedIndex={selectedIndex}/>
-        </section>
+    <div className="w-full">
+      <div className="pt-4 pb-6 flex justify-end">
+        <button className="p-2 flex" onClick={cancelSearch}><IconX /></button>
       </div>
+      <section className="text-center">
+        <Input
+          id="movie"
+          label="Search for a movie"
+          onChange={onMovieChange}
+          value={val}
+          ref={ref}
+          selectedIndex={selectedIndex}
+          setSelectedIndex={setSelectedIndex}
+          onSelect={onSelect}
+          movies={movies}
+        />
+      </section>
+      <section>
+        <MovieResultList movies={movies} onSelect={onSelect} imageConfig={imageConfig} selectedIndex={selectedIndex}/>
+      </section>
+    </div>
   )
 }
 
@@ -240,8 +244,8 @@ function FavoriteMovieList({favorites, setFavorites, onFavoriteRemove, setShowMo
       <h1>My Favorite Movies</h1>
     </section>
     <section>
-      <div className="py-4 text-center">
-        <button className="p-2" onClick={() => setShowModal(true)}>+ Add Movie</button>
+      <div className="py-4 flex justify-center">
+        <button className="p-2 flex" onClick={() => setShowModal(true)}><IconPlus /> Add Movie</button>
       </div>
       <DndContext
           collisionDetection={closestCenter}
@@ -312,6 +316,7 @@ export default function SubmitFilms() {
   }
 
   const onFavoriteSelect = useCallback((movie, enterSelect = false) => {
+    console.log('LOG: OnFavoriteSelect', movie);
     if (favorites.some(fav => fav.id === movie.id)) {
       resetAlert({style: 'warning', message: `${movie.title} is already on list`})
     } else {
