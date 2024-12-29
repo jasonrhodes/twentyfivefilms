@@ -1,8 +1,8 @@
 'use client';
 
-import React, {useState, useEffect, useMemo, useRef} from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { buildImageUrl } from '@/lib/buildImageUrl';
-import {CSS} from '@dnd-kit/utilities';
+import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
 
 export function MovieItem({ movie, onSelect, onRemove, imageConfig, selected, dragging, dropping }) {

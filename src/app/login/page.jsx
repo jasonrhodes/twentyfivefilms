@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@/components/MyInput';
+import { Input } from '@/components/Input';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 
@@ -13,7 +13,6 @@ export default function LoginPage() {
     if (userId.length === 0) {
       return;
     }
-    // TODO route to a user id marked route like /[user]/my25
     router.push(`/${userId}/my25`);
   });
 

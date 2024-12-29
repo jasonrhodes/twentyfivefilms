@@ -3,7 +3,7 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import { IconX } from '@tabler/icons-react';
 import { lookupMovie } from '@/lib/lookupMovie';
-import { Input } from '@/components/MyInput';
+import { Input } from '@/components/Input';
 import { MovieResultList } from './MovieResultList';
 
 export function ChooseMovieModal({ initialValue = '', onSelect, imageConfig, setShowModal }) {
