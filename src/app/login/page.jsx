@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
 import { Input } from '@/components/Input';
 import { useRouter } from 'next/navigation';
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 
 export default function LoginPage() {
   const [userId, setUserId] = useState('');
   const router = useRouter();
   const onUserIdChange = useCallback(val => setUserId(val));
-  const onLogin = useCallback((e) => {
+  const onLogin = useCallback(e => {
     e.preventDefault();
     if (userId.length === 0) {
       return;
@@ -24,13 +24,13 @@ export default function LoginPage() {
           id="userId"
           label="Your unique identifier"
           onChange={onUserIdChange}
-          autoComplete="off" 
-          data-1p-ignore 
+          autoComplete="off"
+          data-1p-ignore
           data-lpignore="true"
           data-bwignore="true"
         />
         <button type="submit">Go</button>
       </form>
     </div>
-  )
+  );
 }
