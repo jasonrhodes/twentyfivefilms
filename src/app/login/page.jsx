@@ -1,17 +1,20 @@
 'use client'
 
-import { Input } from '@/components/input';
+import { Input } from '@/components/Input';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState(null);
+  const [userId, setUserId] = useState('');
   const router = useRouter();
-  const onEmailChange = useCallback(val => setEmail(val));
+  const onUserIdChange = useCallback(val => setUserId(val));
   const onLogin = useCallback((e) => {
     e.preventDefault();
+    if (userId.length === 0) {
+      return;
+    }
     // TODO route to a user id marked route like /[user]/my25
-    router.push('/submit');
+    router.push(`/${userId}/my25`);
   });
 
   return (
@@ -21,7 +24,7 @@ export default function LoginPage() {
         <Input
           id="userId"
           label="Your unique identifier"
-          onChange={onEmailChange}
+          onChange={onUserIdChange}
           autoComplete="off" 
           data-1p-ignore 
           data-lpignore="true"
