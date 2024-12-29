@@ -29,6 +29,10 @@ export default function SubmitFilms() {
   }
 
   const onFavoriteSelect = useCallback((movie, enterSelect = false) => {
+    if (!movie) {
+      return;
+    }
+    
     if (favorites.some(fav => fav.id === movie.id)) {
       resetAlert({style: 'warning', message: `${movie.title} is already on list`})
     } else {
