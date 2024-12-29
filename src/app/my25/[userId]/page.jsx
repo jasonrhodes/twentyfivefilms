@@ -37,18 +37,18 @@ export default function SubmitFilms() {
       if (favorites.some((fav) => fav.id === movie.id)) {
         resetAlert({
           style: 'warning',
-          message: `${movie.title} is already on list`,
+          message: `${movie.title} is already on list`
         });
       } else {
         setFavorites([...favorites, movie]);
         setShowModal(false);
         resetAlert({
           style: 'success',
-          message: `${movie.title} added to the list`,
+          message: `${movie.title} added to the list`
         });
       }
     },
-    [favorites, setFavorites, setShowModal],
+    [favorites, setFavorites, setShowModal]
   );
 
   const onFavoriteRemove = useCallback(
@@ -57,10 +57,10 @@ export default function SubmitFilms() {
       setFavorites(updated);
       resetAlert({
         style: 'danger',
-        message: `${movie.title} removed from list`,
+        message: `${movie.title} removed from list`
       });
     },
-    [favorites, setFavorites],
+    [favorites, setFavorites]
   );
 
   return (

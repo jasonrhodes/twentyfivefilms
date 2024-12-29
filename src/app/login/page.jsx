@@ -7,13 +7,13 @@ import React, { useState, useCallback } from 'react';
 export default function LoginPage() {
   const [userId, setUserId] = useState('');
   const router = useRouter();
-  const onUserIdChange = useCallback(val => setUserId(val));
-  const onLogin = useCallback(e => {
+  const onUserIdChange = useCallback((val) => setUserId(val));
+  const onLogin = useCallback((e) => {
     e.preventDefault();
     if (userId.length === 0) {
       return;
     }
-    router.push(`/${userId}/my25`);
+    router.push(`/my25/${userId}`);
   });
 
   return (
