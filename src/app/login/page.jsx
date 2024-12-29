@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@/components/Input';
+import { Input } from '@/components/MyInput';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 

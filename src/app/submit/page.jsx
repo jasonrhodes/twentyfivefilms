@@ -4,7 +4,7 @@ import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import { lookupMovie } from '@/lib/lookupMovie';
 import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { buildImageUrl } from '@/lib/buildImageUrl';
-import { Input } from '@/components/Input';
+import { Input } from '@/components/MyInput';
 import {CSS} from '@dnd-kit/utilities';
 import {
   DndContext,
