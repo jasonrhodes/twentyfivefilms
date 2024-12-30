@@ -1,4 +1,4 @@
-'use server'
+'use server';
 
 const url = 'https://api.themoviedb.org/3/configuration';
 const options = {
@@ -11,8 +11,7 @@ const options = {
 
 export async function getTmdbConfig() {
   try {
-    const config = await fetch(url, options)
-      .then(res => res.json());
+    const config = await fetch(url, options).then((res) => res.json());
     return config;
   } catch (err) {
     console.error('Error while fetching TMDB configuration' + err);

@@ -5,6 +5,17 @@ import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
 import { FavoriteMovieList } from './components/FavoriteMovieList';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
+import { COUNTED, NUM_RATED } from '@/lib/constants';
+
+function labelFromListLength(length) {
+  if (length > COUNTED) {
+    return 'Uncounted';
+  } else if (length > NUM_RATED) {
+    return 'Honorable Mentions';
+  } else {
+    return `Top ${NUM_RATED}`;
+  }
+}
 
 export default function SubmitFilms() {
   const [showModal, setShowModal] = useState(false);
@@ -40,11 +51,13 @@ export default function SubmitFilms() {
           message: `${movie.title} is already on list`
         });
       } else {
-        setFavorites([...favorites, movie]);
+        const newFavourites = [...favorites, movie];
+        setFavorites(newFavourites);
         setShowModal(false);
+        const listName = labelFromListLength(newFavourites.length);
         resetAlert({
           style: 'success',
-          message: `${movie.title} added to the list`
+          message: `${movie.title} added to ${listName}`
         });
       }
     },
