@@ -20,7 +20,7 @@ import {
 } from '@dnd-kit/sortable';
 import { IconPlus } from '@tabler/icons-react';
 import { ListMovieItem } from './MovieItem';
-import {COUNTED, NUM_RATED} from "@/lib/constants";
+import { COUNTED, NUM_RATED } from '@/lib/constants';
 
 class MyMouserSensor extends MouseSensor {
   static activators = [
@@ -102,7 +102,9 @@ export function FavoriteMovieList({
   useEffect(() => keyCodeListener('Enter', () => setShowModal(true)), []);
 
   const topTen = favorites.filter((m, i) => i < NUM_RATED);
-  const honorableMentions = favorites.filter((m, i) => i >= NUM_RATED && i < COUNTED);
+  const honorableMentions = favorites.filter(
+    (m, i) => i >= NUM_RATED && i < COUNTED
+  );
   const overflow = favorites.filter((m, i) => i >= COUNTED);
 
   return (

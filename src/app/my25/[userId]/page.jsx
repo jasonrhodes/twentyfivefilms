@@ -5,7 +5,7 @@ import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
 import { FavoriteMovieList } from './components/FavoriteMovieList';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
-import {COUNTED, NUM_RATED} from "@/lib/constants";
+import { COUNTED, NUM_RATED } from '@/lib/constants';
 
 function labelFromListLength(length) {
   if (length > COUNTED) {
