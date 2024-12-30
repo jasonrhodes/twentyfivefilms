@@ -10,7 +10,7 @@ export function ChooseMovieModal({
   initialValue = '',
   onSelect,
   imageConfig,
-  setShowModal,
+  setShowModal
 }) {
   const [val, setVal] = useState(initialValue);
   const [movies, setMovies] = useState([]);
@@ -19,15 +19,15 @@ export function ChooseMovieModal({
   const ref = useRef();
 
   const onMovieChange = useCallback(
-    pattern => {
+    (pattern) => {
       setVal(pattern);
     },
-    [setVal],
+    [setVal]
   );
 
   const cancelSearch = useCallback(() => setShowModal(false), [setShowModal]);
 
-  const onKeyDown = useCallback(event => {
+  const onKeyDown = useCallback((event) => {
     if (event.code === 'ArrowUp') {
       event.preventDefault();
       setDisableHoverSelect(true);
@@ -36,7 +36,7 @@ export function ChooseMovieModal({
       event.preventDefault();
       setDisableHoverSelect(true);
       setSelectedIndex(
-        selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1,
+        selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1
       );
     } else if (event.code === 'Enter') {
       event.preventDefault();

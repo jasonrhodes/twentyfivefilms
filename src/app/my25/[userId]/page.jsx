@@ -7,13 +7,13 @@ import { FavoriteMovieList } from './components/FavoriteMovieList';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
 
 function labelFromListLength(length) {
-    if (length > 25) {
-        return 'Uncounted';
-    } else if (length > 10) {
-        return 'Honorable Mentions';
-    } else {
-        return 'Top 10';
-    }
+  if (length > 25) {
+    return 'Uncounted';
+  } else if (length > 10) {
+    return 'Honorable Mentions';
+  } else {
+    return 'Top 10';
+  }
 }
 
 export default function SubmitFilms() {
@@ -53,7 +53,7 @@ export default function SubmitFilms() {
         const newFavourites = [...favorites, movie];
         setFavorites(newFavourites);
         setShowModal(false);
-        const listName = labelFromListLength(newFavourites.length)
+        const listName = labelFromListLength(newFavourites.length);
         resetAlert({
           style: 'success',
           message: `${movie.title} added to ${listName}`

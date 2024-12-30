@@ -23,7 +23,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <div className="p-2 sm:p-8 pb-20 min-h-svh font-[family-name:var(--font-geist-sans)] flex justify-between items-center flex-col">
           <main className="flex pb-20 items-center justify-center w-full lg:w-[1040px]">
             {children}

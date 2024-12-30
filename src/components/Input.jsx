@@ -16,11 +16,11 @@ export function Input(options) {
   } = options;
 
   const internalOnChange = useCallback(
-    e => {
+    (e) => {
       const updatedValue = e.currentTarget.value;
       onChange(updatedValue);
     },
-    [onChange],
+    [onChange]
   );
 
   return (

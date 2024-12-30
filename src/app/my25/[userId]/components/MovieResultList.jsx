@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import {SearchMovieItem} from './MovieItem';
+import { SearchMovieItem } from './MovieItem';
 
 export function MovieResultList({
   movies,
@@ -9,7 +9,7 @@ export function MovieResultList({
   imageConfig,
   selectedIndex,
   setSelectedIndex,
-  disableHoverSelect,
+  disableHoverSelect
 }) {
   const handleHover = useCallback((e, index) => {
     if (!disableHoverSelect) {
@@ -23,7 +23,8 @@ export function MovieResultList({
         {movies.map((movie, i) => (
           <li
             key={`${movie.title}-${movie.id}`}
-            onMouseEnter={e => handleHover(e, i)}>
+            onMouseEnter={(e) => handleHover(e, i)}
+          >
             <SearchMovieItem
               movie={movie}
               onSelect={onSelect}
