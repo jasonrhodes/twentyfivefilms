@@ -20,6 +20,7 @@ import {
 } from '@dnd-kit/sortable';
 import { IconPlus } from '@tabler/icons-react';
 import { ListMovieItem } from './MovieItem';
+import {COUNTED, NUM_RATED} from "@/lib/constants";
 
 class MyMouserSensor extends MouseSensor {
   static activators = [
@@ -100,9 +101,9 @@ export function FavoriteMovieList({
 
   useEffect(() => keyCodeListener('Enter', () => setShowModal(true)), []);
 
-  const topTen = favorites.filter((m, i) => i < 10);
-  const honorableMentions = favorites.filter((m, i) => i > 9 && i < 25);
-  const overflow = favorites.filter((m, i) => i > 24);
+  const topTen = favorites.filter((m, i) => i < NUM_RATED);
+  const honorableMentions = favorites.filter((m, i) => i >= NUM_RATED && i < COUNTED);
+  const overflow = favorites.filter((m, i) => i >= COUNTED);
 
   return (
     <div className="w-full flex-auto">
@@ -125,7 +126,7 @@ export function FavoriteMovieList({
             <div className="flex-col md:flex-row flex gap-2">
               <div className="flex-1 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 flex flex-col">
                 <div className="font-bold text-lg my-2">
-                  Top 10
+                  Top {NUM_RATED}
                   <div className="text-gray-500 text-sm">
                     (Unranked, equally weighted)
                   </div>
@@ -148,9 +149,9 @@ export function FavoriteMovieList({
                   <div className="text-gray-500 text-sm">
                     (
                     {honorableMentions.length === 0
-                      ? 'Movies will appear here when your top ten is full. '
+                      ? `Movies will appear here when your Top ${NUM_RATED} is full. `
                       : ''}
-                    Unranked, weighted less than top 10)
+                    Unranked, weighted less than Top {NUM_RATED})
                   </div>
                 </div>
                 {honorableMentions.map((movie) => (
@@ -171,7 +172,7 @@ export function FavoriteMovieList({
                 <div className="font-bold text-lg my-2">
                   Uncounted
                   <div className="text-gray-500 text-sm">
-                    (Your Top 10 and 15 Honorable Mentions are full)
+                    (Your Top {NUM_RATED} and 15 Honorable Mentions are full)
                   </div>
                 </div>
                 <div className="md:w-[50%]">

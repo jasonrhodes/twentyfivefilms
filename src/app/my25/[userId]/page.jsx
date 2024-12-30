@@ -5,14 +5,15 @@ import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
 import { FavoriteMovieList } from './components/FavoriteMovieList';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
+import {COUNTED, NUM_RATED} from "@/lib/constants";
 
 function labelFromListLength(length) {
-  if (length > 25) {
+  if (length > COUNTED) {
     return 'Uncounted';
-  } else if (length > 10) {
+  } else if (length > NUM_RATED) {
     return 'Honorable Mentions';
   } else {
-    return 'Top 10';
+    return `Top ${NUM_RATED}`;
   }
 }
 
