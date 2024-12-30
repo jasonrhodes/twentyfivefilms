@@ -129,7 +129,7 @@ export function FavoriteMovieList({
               <div className="flex-1 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 flex flex-col">
                 <div className="font-bold text-lg my-2">
                   Top {NUM_RATED}
-                  <div className="text-gray-500 text-sm">
+                  <div className="text-gray-500 text-sm min-h-[40px]">
                     (Unranked, equally weighted)
                   </div>
                 </div>
@@ -148,12 +148,13 @@ export function FavoriteMovieList({
               <div className="flex-1 border-2 border-gray-400 border-dashed p-3 flex flex-col">
                 <div className="font-bold text-lg my-2">
                   Honorable Mentions
-                  <div className="text-gray-500 text-sm">
+                  <div className="text-gray-500 text-sm min-h-[40px]">
                     (
                     {honorableMentions.length === 0
                       ? `Movies will appear here when your Top ${NUM_RATED} is full. `
                       : ''}
-                    Unranked, weighted less than Top {NUM_RATED})
+                    Maximum {NUM_HM} movies, unranked, weighted less than Top{' '}
+                    {NUM_RATED})
                   </div>
                 </div>
                 {honorableMentions.map((movie) => (
