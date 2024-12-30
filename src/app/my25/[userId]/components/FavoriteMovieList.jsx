@@ -20,7 +20,7 @@ import {
 } from '@dnd-kit/sortable';
 import { IconPlus } from '@tabler/icons-react';
 import { ListMovieItem } from './MovieItem';
-import { COUNTED, NUM_RATED } from '@/lib/constants';
+import { COUNTED, NUM_HM, NUM_RATED } from '@/lib/constants';
 
 class MyMouserSensor extends MouseSensor {
   static activators = [
@@ -174,7 +174,8 @@ export function FavoriteMovieList({
                 <div className="font-bold text-lg my-2">
                   Uncounted
                   <div className="text-gray-500 text-sm">
-                    (Your Top {NUM_RATED} and 15 Honorable Mentions are full)
+                    (Your Top {NUM_RATED} and {NUM_HM} Honorable Mentions are
+                    full)
                   </div>
                 </div>
                 <div className="md:w-[50%]">
