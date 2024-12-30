@@ -153,8 +153,8 @@ export function FavoriteMovieList({
                     {honorableMentions.length === 0
                       ? `Movies will appear here when your Top ${NUM_RATED} is full. `
                       : ''}
-                    Maximum {NUM_HM} movies, unranked, weighted less than Top{' '}
-                    {NUM_RATED})
+                    {`Maximum ${NUM_HM} movies, unranked, weighted less than Top ${NUM_RATED}`}
+                    )
                   </div>
                 </div>
                 {honorableMentions.map((movie) => (
