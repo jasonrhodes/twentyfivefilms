@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import { MovieItem } from './MovieItem';
+import {SearchMovieItem} from './MovieItem';
 
 export function MovieResultList({
   movies,
@@ -24,7 +24,7 @@ export function MovieResultList({
           <li
             key={`${movie.title}-${movie.id}`}
             onMouseEnter={e => handleHover(e, i)}>
-            <MovieItem
+            <SearchMovieItem
               movie={movie}
               onSelect={onSelect}
               imageConfig={imageConfig}

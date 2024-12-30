@@ -15,11 +15,10 @@ import {
 import {
   arrayMove,
   SortableContext,
-  verticalListSortingStrategy,
-  sortableKeyboardCoordinates,
+  sortableKeyboardCoordinates, rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { IconPlus } from '@tabler/icons-react';
-import { MovieItem } from './MovieItem';
+import {ListMovieItem} from './MovieItem';
 
 class MyMouserSensor extends MouseSensor {
   static activators = [
@@ -99,6 +98,10 @@ export function FavoriteMovieList({
 
   useEffect(() => keyCodeListener('Enter', () => setShowModal(true)), []);
 
+  const topTen = favorites.filter((m, i) => i < 10);
+  const honorableMentions = favorites.filter((m, i) => i > 9 && i < 25);
+  const overflow = favorites.filter((m, i) => i > 24)
+
   return (
     <div className="w-full flex-auto">
       <section className="text-center">
@@ -116,62 +119,60 @@ export function FavoriteMovieList({
           onDragStart={handleDragStart}
           sensors={sensors}>
           <SortableContext
-            items={favorites}
-            strategy={verticalListSortingStrategy}>
-            {favorites.length > 0 && (
-              <div className="bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 mb-3">
+              items={favorites}
+              strategy={rectSortingStrategy}>
+            <div className="flex-col md:flex-row flex gap-2">
+              <div className="flex-1 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 flex flex-col">
                 <div className="font-bold text-lg my-2">
-                  Top 10{' '}
-                  <span className="text-gray-500 text-sm">
+                  Top 10
+                  <div className="text-gray-500 text-sm">
                     (Unranked, equally weighted)
-                  </span>
+                  </div>
                 </div>
-                {favorites
-                  .filter((m, i) => i < 10)
-                  .map(movie => (
-                    <Draggable key={movie.id} id={movie.id}>
-                      <MovieItem
+                {topTen.map((movie) => (
+                  <Draggable key={movie.id} id={movie.id}>
+                    <ListMovieItem
                         key={`${movie.title}-${movie.id}`}
                         imageConfig={imageConfig}
                         movie={movie}
                         onRemove={onFavoriteRemove}
                         dropping={activeId === movie.id}
-                      />
-                    </Draggable>
-                  ))}
+                    />
+                  </Draggable>
+                ))}
               </div>
-            )}
-            {favorites.length > 10 && (
-              <div className="border-2 border-gray-400 border-dashed p-3 mb-3">
+              <div className="flex-1 border-2 border-gray-400 border-dashed p-3 flex flex-col">
                 <div className="font-bold text-lg my-2">
-                  Honorable Mentions{' '}
-                  <span className="text-gray-500 text-sm">
-                    (Unranked, weighted less than top 10)
-                  </span>
+                  Honorable Mentions
+                  <div className="text-gray-500 text-sm">
+                    ({honorableMentions.length === 0 ? 'Movies will appear here when your top ten is full. ' : ''}Unranked, weighted less than top 10)
+                  </div>
                 </div>
-                {favorites
-                  .filter((m, i) => i > 9 && i < 25)
-                  .map(movie => (
-                    <Draggable key={movie.id} id={movie.id}>
-                      <MovieItem
+                {honorableMentions.map((movie) => (
+                  <Draggable key={movie.id} id={movie.id}>
+                    <ListMovieItem
                         key={`${movie.title}-${movie.id}`}
                         imageConfig={imageConfig}
                         movie={movie}
                         onRemove={onFavoriteRemove}
                         dropping={activeId === movie.id}
-                      />
-                    </Draggable>
-                  ))}
+                    />
+                  </Draggable>
+                ))}
               </div>
-            )}
-            {favorites.length > 25 && (
-              <div className="opacity-50 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 mb-3">
-                <div className="font-bold text-lg my-2">Uncounted</div>
-                {favorites
-                  .filter((m, i) => i > 24)
-                  .map(movie => (
+            </div>
+            {overflow.length > 0 && (
+              <div className="opacity-50 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 my-2 flex flex-col">
+                <div className="font-bold text-lg my-2">
+                  Uncounted
+                  <div className="text-gray-500 text-sm">
+                    (Your Top 10 and 15 Honorable Mentions are full)
+                  </div>
+                </div>
+                <div className="md:w-[50%]">
+                  {overflow.map(movie => (
                     <Draggable key={movie.id} id={movie.id}>
-                      <MovieItem
+                      <ListMovieItem
                         key={`${movie.title}-${movie.id}`}
                         imageConfig={imageConfig}
                         movie={movie}
@@ -180,12 +181,13 @@ export function FavoriteMovieList({
                       />
                     </Draggable>
                   ))}
+                </div>
               </div>
             )}
           </SortableContext>
           <DragOverlay>
             {activeMovie ? (
-              <MovieItem
+              <ListMovieItem
                 key={`${activeMovie.title}-${activeMovie.id}`}
                 imageConfig={imageConfig}
                 movie={activeMovie}

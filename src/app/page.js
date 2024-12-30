@@ -8,7 +8,7 @@ export default function Home() {
       <p>10 favorites.</p>
       <p>15 honorable mentions.</p>
       <p>Choose your twenty five.</p>
-      <p className="border text-center border-white/[0.2] p-4 hover:border-white/[0.4] hover:bg-white/[0.05] cursor-pointer transition-all rounded-md">
+      <p className="border text-center p-4 border-black/[0.2] hover:border-black/[0.4] hover:bg-black/[0.05] dark:border-white/[0.2] dark:hover:border-white/[0.4] dark:hover:bg-white/[0.05] cursor-pointer transition-all rounded-md">
         <Link href="/login">Get Started</Link>
       </p>
     </div>
