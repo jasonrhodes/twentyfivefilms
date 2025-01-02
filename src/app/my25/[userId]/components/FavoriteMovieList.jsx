@@ -64,7 +64,8 @@ export function FavoriteMovieList({
   setFavorites,
   onFavoriteRemove,
   setShowModal,
-  imageConfig
+  imageConfig,
+  importMovieBox
 }) {
   const [activeId, setActiveId] = useState(null);
 
@@ -111,6 +112,9 @@ export function FavoriteMovieList({
     <div className="w-full flex-auto">
       <section className="text-center">
         <h1>My Twenty Five</h1>
+      </section>
+      <section>
+        <div className="py-4 flex justify-center">{importMovieBox}</div>
       </section>
       <section>
         <div className="py-4 flex justify-center">
