@@ -5,6 +5,7 @@ import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
 import { FavoriteMovieList } from './components/FavoriteMovieList';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
+import { ImportMovies } from './components/ImportMovies';
 import { COUNTED, NUM_RATED } from '@/lib/constants';
 
 function labelFromListLength(length) {
@@ -64,6 +65,35 @@ export default function SubmitFilms() {
     [favorites, setFavorites, setShowModal]
   );
 
+  const onImportSuccess = useCallback(
+    (importedMovies) => {
+      const newMovies = importedMovies.filter((importedMovie) => {
+        return !favorites.some((movie) => movie.id === importedMovie.id);
+      });
+
+      const newFavourites = [...favorites, ...newMovies];
+      setFavorites(newFavourites);
+      const numAdded = newMovies.length;
+      const numSkipped = importedMovies.length - numAdded;
+      let message = `Imported ${numAdded} new movies.`;
+      if (numSkipped > 0) {
+        message += ` (${numSkipped} skipped duplicates)`;
+      }
+      resetAlert({
+        style: 'success',
+        message: message
+      });
+    },
+    [favorites, setFavorites]
+  );
+
+  const onImportFailure = useCallback((importFailureMessage) => {
+    resetAlert({
+      style: 'warning',
+      message: importFailureMessage
+    });
+  });
+
   const onFavoriteRemove = useCallback(
     (movie) => {
       const updated = favorites.filter((f) => f.id !== movie.id);
@@ -92,6 +122,12 @@ export default function SubmitFilms() {
           onFavoriteRemove={onFavoriteRemove}
           setShowModal={setShowModal}
           imageConfig={imageConfig}
+          importMovieBox={
+            <ImportMovies
+              onImportSuccess={onImportSuccess}
+              onImportFailure={onImportFailure}
+            />
+          }
         />
       )}
     </>
