@@ -35,7 +35,7 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
   const isValidUrl = (url) => {
     try {
       new URL(url);
-      if (!url.includes('letterboxd.com')) {
+      if (!url.includes('letterboxd.com') && !url.includes('boxd.it')) {
         return false;
       }
       return true;
