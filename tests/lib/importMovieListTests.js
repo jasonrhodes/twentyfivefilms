@@ -25,15 +25,9 @@ describe('transformUrl', () => {
   });
 
   it('should transform the URL correctly if it has extra stuff', async () => {
-    const inputUrl = 'https://boxd.it/shortened';
-    const resolvedUrl = 'https://letterboxd.com/bluevoid/list/top-100-2020-edition/';
+    const inputUrl = 'https://letterboxd.com/bluevoid/list/top-100-2020-edition/detail';
     const expectedUrl = 'https://letterboxd-list-radarr.onrender.com/bluevoid/list/top-100-2020-edition';
-
-    fetch.mockResolvedValueOnce({
-      url: resolvedUrl,
-      ok: true,
-    });
-
+    
     const result = await transformUrl(inputUrl);
     
     assert.strictEqual(result, expectedUrl);
