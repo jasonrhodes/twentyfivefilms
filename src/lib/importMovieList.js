@@ -10,20 +10,36 @@ const options = {
   }
 };
 
-function transformUrl(url) {
+async function resolveShortenedUrl(url) {
+  const response = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+  return response.url;
+}
+
+export async function transformUrl(url) {
+  // Example url: https://letterboxd.com/bluevoid/list/top-100-2020-edition/
   try {
+    if (url.includes('boxd.it')) {
+      const resolvedUrl = await resolveShortenedUrl(url);
+      if (!resolvedUrl.includes('letterboxd.com')) {
+        throw new Error('Invalid URL');
+      }
+      return transformUrl(resolvedUrl);
+    }
     const urlParts = url.split('/');
-    const username = urlParts[urlParts.length - 4];
-    const listName = urlParts[urlParts.length - 2];
+    if (urlParts.length < 5) {
+      throw new Error('Invalid URL');
+    }
+    const username = urlParts[3];
+    const listName = urlParts[5];
     return `https://letterboxd-list-radarr.onrender.com/${username}/list/${listName}`;
   } catch {
-    throw new Error('Invalid List URL');
+    throw new Error('Invalid URL');
   }
 }
 
 export async function importMovieList(url) {
   try {
-    const transformedUrl = transformUrl(url);
+    const transformedUrl = await transformUrl(url);
     const response = await fetch(transformedUrl, options);
 
     if (!response.ok) {

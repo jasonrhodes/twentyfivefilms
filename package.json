@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node -r esm ./node_modules/jest/bin/jest.js"
   },
   "husky": {
     "hooks": {
@@ -22,6 +23,28 @@
     "*.{html,css,less,ejs}": [
       "prettier --write",
       "git add"
+    ]
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json",
+      "ts",
+      "tsx"
+    ],
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+      "^@/components/(.*)$": "<rootDir>/src/app/my25/[userId]/components/$1",
+      "^@/lib/(.*)$": "<rootDir>/src/lib/$1"
+      },
+    "transform": {
+      "^.+\\.jsx?$": "jest-esm-transformer"
+    },
+    "testMatch": [
+      "**/tests/**/*.[jt]s?(x)",
+      "**/?(*.)+(spec|test).[tj]s?(x)"
     ]
   },
   "dependencies": {
@@ -46,6 +69,9 @@
     "postcss": "^8",
     "prettier": "^3.4.2",
     "prettier-eslint": "^16.3.0",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "jest": "^27.0.0",
+    "esm": "3.2.25",
+    "jest-esm-transformer": "^1.0.0"
   }
 }
