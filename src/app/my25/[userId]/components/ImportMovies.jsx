@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { importMovieList } from '@/lib/importMovieList';
+import { INVALID_URL_ERROR } from '@/lib/constants';
 
 export function ImportMovies({ onImportSuccess, onImportFailure }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -12,35 +13,21 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
     setIsExpanded(false);
     setIsImporting(true);
     try {
-      const url = inputValue;
-      if (!isValidUrl(url)) {
-        onImportFailure(
-          'The url is invalid. It must be a public Letterboxd list URL.'
-        );
-      }
-      const importedMovies = await importMovieList(url);
+      const importedMovies = await importMovieList(inputValue);
       onImportSuccess(importedMovies);
     } catch (error) {
       // check if error is due to size too large
       if (error.message.includes('Exceeded maximum')) {
         onImportFailure(error.message);
+      } else if (error.message === INVALID_URL_ERROR) {
+        onImportFailure(
+          'The url is invalid. It must be a public Letterboxd list URL.'
+        );
       } else {
         console.error('Error importing movies:', error);
       }
     } finally {
       setIsImporting(false);
-    }
-  };
-
-  const isValidUrl = (url) => {
-    try {
-      new URL(url);
-      if (!url.includes('letterboxd.com') && !url.includes('boxd.it')) {
-        return false;
-      }
-      return true;
-    } catch {
-      return false;
     }
   };
 
