@@ -10,6 +10,7 @@ export default [
   pluginReact.configs.flat.recommended,
   {
     settings: {
+      extends: 'plugin:@next/next/recommended',
       react: {
         version: 'detect'
       }
