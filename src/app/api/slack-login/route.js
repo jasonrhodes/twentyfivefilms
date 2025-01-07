@@ -44,10 +44,10 @@ async function asyncProcessPostRequest(req) {
 
 export async function POST(req) {
   // do not AWAIT this so we respond immediately
-  asyncProcessPostRequest(req);
+  // asyncProcessPostRequest(req);
 
   return Response.json({
-    type: 'ephemeral',
+    text: 'This is a cool fallback message',
     blocks: [
       {
         type: 'section',
