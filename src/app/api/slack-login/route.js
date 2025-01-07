@@ -1,7 +1,7 @@
 import { generateAuthTokenForSlackUser } from '@/lib/db';
 import { debug } from '@/lib/logger';
 
-export async function POST(req) {
+async function asyncProcessPostRequest(req) {
   const form = await req.formData();
   const userId = form.get('user_id');
   const username = form.get('user_name');
@@ -40,4 +40,19 @@ export async function POST(req) {
       }
     );
   }
+}
+
+export async function POST(req) {
+  // do not AWAIT this so we respond immediately
+  asyncProcessPostRequest(req);
+
+  return Response.json({
+    type: 'ephemeral',
+    blocks: [
+      {
+        type: 'section',
+        text: 'Logging you in, one moment please...'
+      }
+    ]
+  });
 }
