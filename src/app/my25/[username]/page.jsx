@@ -7,6 +7,8 @@ import { FavoriteMovieList } from './components/FavoriteMovieList';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
 import { ImportMovies } from './components/ImportMovies';
 import { COUNTED, NUM_RATED } from '@/lib/constants';
+import { getSession } from '@/lib/session';
+import Link from 'next/link';
 
 function labelFromListLength(length) {
   if (length > COUNTED) {
@@ -18,7 +20,8 @@ function labelFromListLength(length) {
   }
 }
 
-export default function SubmitFilms() {
+export default function SubmitFilms({ params }) {
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [imageConfig, setImageConfig] = useState(null);
@@ -26,13 +29,22 @@ export default function SubmitFilms() {
   const [alertVisible, setAlertVisible] = useState(false);
 
   useEffect(() => {
-    async function doFetch() {
+    async function retrieve() {
+      const p = await params;
+      console.log('params', p);
+      if (!isCurrentUser) {
+        const session = await getSession();
+        console.log('session', session);
+        if (session && session?.user?.username === p.username) {
+          setIsCurrentUser(true);
+        }
+      }
       const config = await getTmdbConfig();
       setImageConfig(config.images);
     }
 
-    doFetch();
-  }, [setImageConfig]);
+    retrieve();
+  }, [setImageConfig, isCurrentUser, setIsCurrentUser]);
 
   const resetAlert = (newAlert) => {
     setAlert(newAlert);
@@ -105,6 +117,17 @@ export default function SubmitFilms() {
     },
     [favorites, setFavorites]
   );
+
+  if (!isCurrentUser) {
+    return (
+      <p>
+        You need to be logged in as this user to view this page.{' '}
+        <Link className="font-bold underline" href="/login">
+          Login →
+        </Link>
+      </p>
+    );
+  }
 
   return (
     <>
