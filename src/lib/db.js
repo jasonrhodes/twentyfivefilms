@@ -85,12 +85,19 @@ function makePassword(length) {
 }
 
 export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
-  await logger.debug('Generating auth token for slack user', username);
+  await logger.debug(
+    'Generating auth token for slack user',
+    username,
+    ' - ',
+    slackUserId
+  );
+
+  await logger.debug(
+    'Also making sure this can log more than a couple messages'
+  );
 
   // Find this user by their slack USER ID (slack user usernames can change)
   const user = await prisma.user.findFirst({ where: { slackUserId } });
-
-  await logger.debug('User found (sync log)');
 
   await logger.debug(
     () =>
