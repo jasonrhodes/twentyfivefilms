@@ -89,39 +89,16 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
     'Generating auth token for slack user',
     username,
     ' - ',
-    slackUserId,
-    ' - ',
-    'U086RV3T5PU'
+    slackUserId
   );
 
   await logger.debug(
     'Also making sure this can log more than a couple messages'
   );
 
-  // temporary test
-  try {
-    await logger.debug('token try ok ok');
-    const testU = await prisma.token.findFirstOrThrow({
-      where: { slackUserId: 'xxx' }
-    });
-    await logger.debug(
-      () => 'found tokens in try/catch test',
-      JSON.stringify(testU)
-    );
-  } catch (error) {
-    console.log('did an error happen please');
-    // swallow for test
-    await logger.debug(
-      'error while finding user',
-      slackUserId,
-      error.message || error
-    );
-  }
-  // end temporary test
-
   // Find this user by their slack USER ID (slack user usernames can change)
   const user = await prisma.user.findFirst({
-    where: { slackUserId: 'U086RV3T5PU' }
+    where: { slackUserId }
   });
 
   await logger.debug(
