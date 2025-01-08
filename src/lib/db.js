@@ -101,7 +101,9 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
   // temporary test
   try {
     await logger.debug('token try ok ok');
-    const testU = await prisma.token.findMany();
+    const testU = await prisma.token.findFirstOrThrow({
+      where: { slackUserId: 'U086RV3T5PU' }
+    });
     await logger.debug(
       () => 'found tokens in try/catch test',
       JSON.stringify(testU)
