@@ -90,6 +90,8 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
   // Find this user by their slack USER ID (slack user usernames can change)
   const user = await prisma.user.findFirst({ where: { slackUserId } });
 
+  await logger.debug('User found (sync log)');
+
   await logger.debug(
     () =>
       `Lookup for user with slackUserId ${slackUserId} complete, user is ${JSON.stringify(user)}`

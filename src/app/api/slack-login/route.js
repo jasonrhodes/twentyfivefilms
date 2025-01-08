@@ -24,6 +24,8 @@ async function asyncProcessPostRequest(req) {
       username
     });
 
+    logger.debug('attempting to send a response back to Slack');
+
     await axios.post(responseUrl, {
       replace_original: true,
       blocks: [
