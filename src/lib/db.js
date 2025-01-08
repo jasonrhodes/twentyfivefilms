@@ -107,6 +107,7 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
       JSON.stringify(testU)
     );
   } catch (error) {
+    console.log('did an error happen please');
     // swallow for test
     await logger.debug(
       'error while finding user',
