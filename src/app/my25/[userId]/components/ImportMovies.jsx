@@ -9,6 +9,14 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
   const [inputValue, setInputValue] = useState('');
   const [isImporting, setIsImporting] = useState(false);
 
+  const handleKeyDownCapture = (event) => {
+    if (event.key === 'Enter' && isExpanded) {
+      event.stopPropagation();
+      event.preventDefault();
+      handleImport();
+    }
+  };
+
   const handleImport = async () => {
     setIsExpanded(false);
     setIsImporting(true);
@@ -41,6 +49,7 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Enter Public Letterboxd List URL"
             className="p-2 m-2 border border-gray-300 rounded w-72"
+            onKeyDownCapture={handleKeyDownCapture}
           />
           <button
             onClick={handleImport}
