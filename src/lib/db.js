@@ -101,7 +101,7 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
   // temporary test
   try {
     const testU = await prisma.user.findMany({
-      where: { slackUserId: 'U086RV3T5PU' }
+      where: { username }
     });
     await logger.debug(
       () => 'found user in try/catch test',
