@@ -101,7 +101,7 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
   // temporary test
   try {
     const testU = await prisma.user.findMany({
-      where: { slackUserId }
+      where: { slackUserId: 'U086RV3T5PU' }
     });
     await logger.debug(
       () => 'found user in try/catch test',
@@ -109,7 +109,7 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
     );
   } catch (error) {
     // swallow for test
-    logger.debug(
+    await logger.debug(
       'error while finding user',
       slackUserId,
       error.message || error
