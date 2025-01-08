@@ -17,3 +17,7 @@ export async function debug(...messages) {
     log(...messages);
   }
 }
+
+export async function error(...messages) {
+  log('[ERROR]', ...messages);
+}

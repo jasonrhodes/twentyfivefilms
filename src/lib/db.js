@@ -3,7 +3,7 @@
 import { PrismaClient } from '@prisma/client';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
-import { debug } from './logger';
+import * as logger from './logger';
 import { sanitizeUser } from './utils';
 
 const STATIC_SECRET = 'my_secret';
@@ -48,16 +48,16 @@ export async function createUser({ username, password, slackUserId = null }) {
 }
 
 export async function loginUser({ username, password }) {
-  debug('Logging in', { username, password });
+  logger.debug('Logging in', { username, password });
   const user = await prisma.user.findFirst({ where: { username } });
-  debug('Found user', { user });
+  logger.debug('Found user', { user });
   const hashedPassword = await hashPassword(password);
 
   if (!user || user.hashedPassword !== hashedPassword) {
     if (!user) {
-      debug('User was not found', username);
+      logger.debug('User was not found', username);
     } else {
-      debug(
+      logger.debug(
         'Passwords did not match -',
         'stored:',
         user.hashedPassword,
@@ -85,44 +85,51 @@ function makePassword(length) {
 }
 
 export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
-  await debug('Generating auth token for slack user', username);
+  await logger.debug('Generating auth token for slack user', username);
 
   // Find this user by their slack USER ID (slack user usernames can change)
   const user = await prisma.user.findFirst({ where: { slackUserId } });
 
-  await debug(
+  await logger.debug(
     () =>
       `Lookup for user with slackUserId ${slackUserId} complete, user is ${JSON.stringify(user)}`
   );
 
   if (!user) {
     const password = makePassword(28);
-    await debug(`User did not exist, creating new user`);
+    await logger.debug(`User did not exist, creating new user`);
     await createUser({ username, slackUserId, password });
-    await debug(
+    await logger.debug(
       `Attempting to recreate the auth token now that the user is created`
     );
     return await generateAuthTokenForSlackUser({ username, slackUserId });
   }
 
-  await debug(`User existed, checking to make sure usernames match`);
+  await logger.debug(`User existed, checking to make sure usernames match`);
   if (user.username !== username) {
-    await debug(
+    await logger.debug(
       `Usernames did not match, ${user.username} vs ${username}, updating record now`
     );
-    await prisma.user.update({ where: { slackUserId }, data: { username } });
+    try {
+      await prisma.user.update({ where: { id: user.id }, data: { username } });
+    } catch (error) {
+      // log and swallow
+      logger.error(
+        `An error occurred while updating usernames that did not match ${user.username} vs. ${username}. Error message: ${error.message || error}`
+      );
+    }
   }
 
-  await debug(`Creating new token`);
+  await logger.debug(`Creating new token`);
   try {
     const token = await prisma.token.create({
       data: { userId: user.id }
     });
 
-    await debug(() => `Token created, ${JSON.stringify(token)}`);
+    await logger.debug(() => `Token created, ${JSON.stringify(token)}`);
     return token;
   } catch (error) {
-    await debug(() => 'Error creating new token', JSON.stringify(error));
+    await logger.debug(() => 'Error creating new token', JSON.stringify(error));
     throw error;
   }
 }
