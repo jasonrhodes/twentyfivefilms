@@ -21,7 +21,7 @@ function labelFromListLength(length) {
 }
 
 export default function SubmitFilms({ params }) {
-  const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [activeSession, setActiveSession] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [imageConfig, setImageConfig] = useState(null);
@@ -32,11 +32,11 @@ export default function SubmitFilms({ params }) {
     async function retrieve() {
       const p = await params;
       console.log('params', p);
-      if (!isCurrentUser) {
+      if (!activeSession) {
         const session = await getSession();
         console.log('session', session);
         if (session && session?.user?.username === p.username) {
-          setIsCurrentUser(true);
+          setActiveSession(true);
         }
       }
       const config = await getTmdbConfig();
@@ -44,13 +44,16 @@ export default function SubmitFilms({ params }) {
     }
 
     retrieve();
-  }, [setImageConfig, isCurrentUser, setIsCurrentUser]);
+  }, [setImageConfig, activeSession, setActiveSession]);
 
-  const resetAlert = (newAlert) => {
-    setAlert(newAlert);
-    setAlertVisible(true);
-    window.setTimeout(() => setAlertVisible(false), 2000);
-  };
+  const resetAlert = useCallback(
+    (newAlert) => {
+      setAlert(newAlert);
+      setAlertVisible(true);
+      window.setTimeout(() => setAlertVisible(false), 2000);
+    },
+    [setAlert, setAlertVisible]
+  );
 
   const onFavoriteSelect = useCallback(
     (movie) => {
@@ -118,7 +121,7 @@ export default function SubmitFilms({ params }) {
     [favorites, setFavorites]
   );
 
-  if (!isCurrentUser) {
+  if (!activeSession) {
     return (
       <p>
         You need to be logged in as this user to view this page.{' '}
