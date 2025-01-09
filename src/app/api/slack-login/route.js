@@ -23,7 +23,7 @@ export async function POST(req) {
 
     try {
       const token = await generateAuthTokenForSlackUser({
-        slackUserId: userId,
+        slack_user_id: userId,
         username
       });
 
@@ -32,6 +32,7 @@ export async function POST(req) {
 
         const message = `Congrats! You can now visit 25 Films at the following login link: ${appBaseUrl}/slack-login?authToken=${token.id}`;
 
+        // use 'stdout' when testing locally if you want the link printed to stdout
         if (responseUrl === 'stdout') {
           logger.info(message);
         } else {

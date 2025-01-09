@@ -4,20 +4,15 @@ import { PrismaClient } from '@prisma/client';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
 import * as logger from './logger';
-import { sanitizeUser } from './utils';
 
 const STATIC_SECRET = 'my_secret';
-const prisma = new PrismaClient();
-
-export async function addMovie({ id, title, releaseDate, posterPath }) {
-  return await prisma.movie.upsert({
-    data: { id, title, releaseDate, posterPath }
-  });
-}
-
-export async function addMovieToList({ userId, movieId, type }) {
-  return await prisma.moviesOnUsers.create({ data: { userId, movieId, type } });
-}
+const prisma = new PrismaClient({
+  omit: {
+    user: {
+      hashed_password: true
+    }
+  }
+});
 
 export async function hashPassword(password) {
   const hmac = createHmac('sha256', STATIC_SECRET);
@@ -25,7 +20,7 @@ export async function hashPassword(password) {
   return hmac.digest('hex');
 }
 
-export async function createUser({ username, password, slackUserId = null }) {
+export async function createUser({ username, password, slack_user_id = null }) {
   const existingUser = await prisma.user.findFirst({ where: { username } });
   if (existingUser) {
     throw new Error(`User ${username} already exists`, {
@@ -34,43 +29,47 @@ export async function createUser({ username, password, slackUserId = null }) {
     });
   }
 
-  const hashedPassword = await hashPassword(password);
+  const hashed_password = await hashPassword(password);
 
-  const created = prisma.user.create({
+  const created = await prisma.user.create({
     data: {
       username,
-      hashedPassword,
-      slackUserId
+      hashed_password,
+      slack_user_id
     }
   });
 
-  return sanitizeUser(created);
+  delete created.hashed_password;
+  return created;
 }
 
 export async function loginUser({ username, password }) {
   logger.debug('Logging in', { username, password });
-  const user = await prisma.user.findFirst({ where: { username } });
-  logger.debug('Found user', { user });
-  const hashedPassword = await hashPassword(password);
+  const user = await prisma.user.findFirst({
+    select: {
+      username: true,
+      hashed_password: true
+    },
+    where: {
+      username
+    }
+  });
 
-  if (!user || user.hashedPassword !== hashedPassword) {
+  const verifyHashedPassword = await hashPassword(password);
+
+  if (!user || user.hashed_password !== verifyHashedPassword) {
     if (!user) {
       logger.debug('User was not found', username);
     } else {
-      logger.debug(
-        'Passwords did not match -',
-        'stored:',
-        user.hashedPassword,
-        ' - provided:',
-        hashedPassword
-      );
+      logger.debug('Passwords did not match');
     }
     return { error: 'LoginError', message: 'Username or password incorrect' };
   }
 
-  const sanitizedUser = sanitizeUser(user);
-  await session.setSession({ user: sanitizedUser });
-  return sanitizedUser;
+  delete user.hashed_password;
+  logger.debug('Found user', user);
+  await session.setSession({ user });
+  return user;
 }
 
 function makePassword(length) {
@@ -84,36 +83,35 @@ function makePassword(length) {
   return result;
 }
 
-export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
+export async function generateAuthTokenForSlackUser({
+  username,
+  slack_user_id
+}) {
   await logger.debug(
     'Generating auth token for slack user',
     username,
     ' - ',
-    slackUserId
-  );
-
-  await logger.debug(
-    'Also making sure this can log more than a couple messages'
+    slack_user_id
   );
 
   // Find this user by their slack USER ID (slack user usernames can change)
   const user = await prisma.user.findFirst({
-    where: { slackUserId }
+    where: { slack_user_id }
   });
 
   await logger.debug(
     () =>
-      `Lookup for user with slackUserId ${slackUserId} complete, user is ${JSON.stringify(user)}`
+      `Lookup for user with slack_user_id ${slack_user_id} complete, user is ${JSON.stringify(user)}`
   );
 
   if (!user) {
     const password = makePassword(28);
     await logger.debug(`User did not exist, creating new user`);
-    await createUser({ username, slackUserId, password });
+    await createUser({ username, slack_user_id, password });
     await logger.debug(
       `Attempting to recreate the auth token now that the user is created`
     );
-    return await generateAuthTokenForSlackUser({ username, slackUserId });
+    return await generateAuthTokenForSlackUser({ username, slack_user_id });
   }
 
   await logger.debug(`User existed, checking to make sure usernames match`);
@@ -134,7 +132,7 @@ export async function generateAuthTokenForSlackUser({ username, slackUserId }) {
   await logger.debug(`Creating new token`);
   try {
     const token = await prisma.token.create({
-      data: { userId: user.id }
+      data: { user_id: user.id }
     });
 
     await logger.debug(() => `Token created, ${JSON.stringify(token)}`);
@@ -152,4 +150,24 @@ export async function getAuthTokenRecord({ token }) {
       user: true
     }
   });
+}
+
+export async function getLists({ user_id }) {
+  // TODO: NOT IMPLEMENTED
+  return {
+    favorites: [],
+    hms: [],
+    queue: []
+  };
+}
+
+// lists should be an array of { type, movies }
+export async function saveLists({ user_id, lists }) {
+  // TODO: NOT IMPLEMENTED
+  const summary = lists
+    .map((l) => `${l.type}: ${l.movies.length} movies`)
+    .join(', ');
+  console.log(
+    `Saving ${lists.length} list(s) for user id ${user_id} (${summary})`
+  );
 }
