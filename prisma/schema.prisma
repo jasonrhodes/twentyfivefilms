@@ -13,47 +13,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                Int     @id @default(autoincrement())
-  username          String  @unique
-  hashedPassword    String
-  slackUserId       String?
-  tokens            Token[]
-  movies            MoviesOnUsers[]
+enum MovieListType {
+  FAVORITE
+  HM
+  QUEUE
 }
 
 enum TokenType {
   AUTH
 }
 
+model User {
+  id                 Int            @id @default(autoincrement())
+  username           String         @unique
+  hashed_password    String
+  slack_user_id      String?
+  tokens             Token[]
+  lists              ListsOnUser[]
+}
+
+model List {
+  id          Int               @id @default(autoincrement())
+  type        MovieListType
+  movies      MoviesOnList[]
+  users       ListsOnUser[]
+}
+
+model MoviesOnList {
+  movie      Movie     @relation(fields: [movie_id], references: [id])
+  movie_id   Int
+  list       List      @relation(fields: [list_id], references: [id])
+  list_id    Int
+  order      Int
+
+  @@id(name: "movie_list_id", fields: [movie_id, list_id])
+}
+
+model ListsOnUser {
+  list       List    @relation(fields: [list_id], references: [id])
+  list_id    Int
+  user       User    @relation(fields: [user_id], references: [id])
+  user_id    Int
+
+  @@id(name: "list_user_id", fields: [list_id, user_id])
+}
+
 model Token {
-  id          String      @id @default(uuid())
-  createdAt   DateTime    @default(now())
-  user        User        @relation(fields: [userId], references: [id])
-  userId      Int
-  type        TokenType   @default(AUTH)
+  id           String      @id @default(uuid())
+  created_at   DateTime    @default(now())
+  user         User        @relation(fields: [user_id], references: [id])
+  user_id      Int
+  type         TokenType   @default(AUTH)
 }
 
 model Movie {
-  id          Int         @id
-  createdAt   DateTime    @default(now())
-  title       String
-  posterPath  String?
-  users       MoviesOnUsers[]
+  id              Int             @id
+  created_at      DateTime        @default(now())
+  title           String
+  release_date    DateTime        @db.Date
+  poster_path     String?
+  lists           MoviesOnList[]
 }
 
-enum MovieListType {
-  FAVORITE
-  HM
-  UNUSED
-}
-
-model MoviesOnUsers {
-  movie     Movie           @relation(fields: [movieId], references: [id])
-  movieId   Int
-  user      User            @relation(fields: [userId], references: [id])
-  userId    Int
-  type      MovieListType
-
-  @@id([movieId, userId])
-}
