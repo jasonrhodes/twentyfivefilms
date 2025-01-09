@@ -39,3 +39,8 @@ export async function getSession() {
   }
   return decryptJson(encrypted.value);
 }
+
+export async function removeSession() {
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_NAME);
+}
