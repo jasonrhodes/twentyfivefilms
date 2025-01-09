@@ -9,6 +9,8 @@ import { ImportMovies } from './components/ImportMovies';
 import { COUNTED, NUM_RATED } from '@/lib/constants';
 import { getSession } from '@/lib/session';
 import Link from 'next/link';
+import { MovieListType } from '@prisma/client';
+import { addMovie, getMoviesForUser } from '@/lib/db';
 
 function labelFromListLength(length) {
   if (length > COUNTED) {
@@ -21,7 +23,7 @@ function labelFromListLength(length) {
 }
 
 export default function SubmitFilms({ params }) {
-  const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [activeSession, setActiveSession] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [imageConfig, setImageConfig] = useState(null);
@@ -31,12 +33,14 @@ export default function SubmitFilms({ params }) {
   useEffect(() => {
     async function retrieve() {
       const p = await params;
-      console.log('params', p);
-      if (!isCurrentUser) {
+      if (!activeSession) {
         const session = await getSession();
-        console.log('session', session);
         if (session && session?.user?.username === p.username) {
-          setIsCurrentUser(true);
+          console.log('Setting active session lets go', session);
+          setActiveSession(session);
+          const movies = await getMoviesForUser({ userId: session.user.id });
+          // TODO: figure out how to populate hms and unused this way
+          setFavorites(movies.favorites);
         }
       }
       const config = await getTmdbConfig();
@@ -44,16 +48,14 @@ export default function SubmitFilms({ params }) {
     }
 
     retrieve();
-  }, [setImageConfig, isCurrentUser, setIsCurrentUser]);
+  }, [setImageConfig, activeSession, setActiveSession]);
 
-  const resetAlert = (newAlert) => {
-    setAlert(newAlert);
-    setAlertVisible(true);
-    window.setTimeout(() => setAlertVisible(false), 2000);
-  };
+  useEffect(() => {
+    console.log('favorites has changed', favorites);
+  }, [favorites]);
 
   const onFavoriteSelect = useCallback(
-    (movie) => {
+    async (movie) => {
       if (!movie) {
         return;
       }
@@ -64,17 +66,29 @@ export default function SubmitFilms({ params }) {
           message: `${movie.title} is already on list`
         });
       } else {
-        const newFavourites = [...favorites, movie];
-        setFavorites(newFavourites);
+        movie.release_date = new Date(movie.release_date);
+        const updatedMovies = await addMovie({
+          movie,
+          userId: activeSession.user.id,
+          // TODO: figure out how to decide which type here
+          type: MovieListType.FAVORITE
+        });
+        console.log('updated movies, no refresh needed', updatedMovies);
+        if (Array.isArray(updatedMovies.favorites)) {
+          setFavorites(updatedMovies.favorites);
+        } else {
+          console.error('why is this not an array?');
+        }
+
         setShowModal(false);
-        const listName = labelFromListLength(newFavourites.length);
         resetAlert({
           style: 'success',
-          message: `${movie.title} added to ${listName}`
+          // TODO: figure out how to decide which type here
+          message: `${movie.title} added to ${MovieListType.FAVORITE}`
         });
       }
     },
-    [favorites, setFavorites, setShowModal]
+    [favorites, setFavorites, setShowModal, activeSession]
   );
 
   const onImportSuccess = useCallback(
@@ -118,7 +132,18 @@ export default function SubmitFilms({ params }) {
     [favorites, setFavorites]
   );
 
-  if (!isCurrentUser) {
+  const resetAlert = useCallback(
+    (newAlert) => {
+      setAlert(newAlert);
+      setAlertVisible(true);
+      window.setTimeout(() => setAlertVisible(false), 2000);
+    },
+    [setAlert, setAlertVisible]
+  );
+
+  console.log('main page state - favorites?', favorites);
+
+  if (!activeSession) {
     return (
       <p>
         You need to be logged in as this user to view this page.{' '}

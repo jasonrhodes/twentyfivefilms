@@ -8,11 +8,11 @@ import { useSortable } from '@dnd-kit/sortable';
 function MovieItem({ movie, imageConfig }) {
   const imageUrl = useMemo(
     () =>
-      movie.poster_path
+      movie.posterPath
         ? buildImageUrl({
             config: imageConfig,
             size: 'xs',
-            path: movie.poster_path
+            path: movie.posterPath
           })
         : null,
     [movie]
@@ -22,8 +22,7 @@ function MovieItem({ movie, imageConfig }) {
     <>
       <div
         className="h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center"
-        style={{ flex: '0 0 4rem' }}
-      >
+        style={{ flex: '0 0 4rem' }}>
         {imageUrl ? (
           <img className="w-full h-full" src={imageUrl} />
         ) : (
@@ -33,10 +32,7 @@ function MovieItem({ movie, imageConfig }) {
       <div className="pr-3 pl-3 w-full flex-auto">
         <b>{`${movie.title} `}</b>
         <span className="text-sm">
-          (
-          {movie.release_date
-            ? new Date(movie.release_date).getFullYear()
-            : '?'}
+          ({movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : '?'}
           )
         </span>
       </div>
@@ -75,8 +71,7 @@ export function SearchMovieItem({ movie, onSelect, selected, imageConfig }) {
     <div
       className={`flex items-center h-24 mb-4 cursor-pointer ${backgroundColor} sm:pr-2`}
       onClick={() => onSelect(movie)}
-      ref={scrollRef}
-    >
+      ref={scrollRef}>
       <MovieItem imageConfig={imageConfig} movie={movie} />
     </div>
   );
@@ -116,8 +111,7 @@ export function ListMovieItem({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
-    >
+      {...listeners}>
       {dropping ? (
         <MovieDropZone />
       ) : (
@@ -127,8 +121,7 @@ export function ListMovieItem({
             className="cursor-pointer bg-red-100 dark:bg-red-900 hover:bg-red-700 dark:hover:bg-red-700 pr-2 pl-2 rounded-2xl hover:text-white dark:text-white deleteButton"
             onMouseEnter={() => setDeleteStyle(true)}
             onMouseLeave={() => setDeleteStyle(false)}
-            onClick={() => onRemove(movie)}
-          >
+            onClick={() => onRemove(movie)}>
             <span className="text-2xl leading-none pointer-events-none">-</span>
           </div>
         </>

@@ -52,8 +52,7 @@ function Draggable(props) {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      style={{ listStyle: 'none' }}
-    >
+      style={{ listStyle: 'none' }}>
       {props.children}
     </li>
   );
@@ -67,6 +66,7 @@ export function FavoriteMovieList({
   imageConfig,
   importMovieBox
 }) {
+  console.log('FavoriteMovieList: passed in favorites', favorites);
   const [activeId, setActiveId] = useState(null);
 
   const handleDragEnd = (event) => {
@@ -126,8 +126,7 @@ export function FavoriteMovieList({
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
           onDragStart={handleDragStart}
-          sensors={sensors}
-        >
+          sensors={sensors}>
           <SortableContext items={favorites} strategy={rectSortingStrategy}>
             <div className="flex-col md:flex-row flex gap-2">
               <div className="flex-1 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 flex flex-col">

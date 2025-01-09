@@ -1,6 +1,6 @@
 'use server';
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, MovieListType } from '@prisma/client';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
 import * as logger from './logger';
@@ -8,12 +8,6 @@ import { sanitizeUser } from './utils';
 
 const STATIC_SECRET = 'my_secret';
 const prisma = new PrismaClient();
-
-export async function addMovie({ id, title, releaseDate, posterPath }) {
-  return await prisma.movie.upsert({
-    data: { id, title, releaseDate, posterPath }
-  });
-}
 
 export async function addMovieToList({ userId, movieId, type }) {
   return await prisma.moviesOnUsers.create({ data: { userId, movieId, type } });
@@ -152,4 +146,67 @@ export async function getAuthTokenRecord({ token }) {
       user: true
     }
   });
+}
+
+export async function getMoviesForUser({ userId }) {
+  const movies = await prisma.moviesOnUsers.findMany({
+    where: {
+      userId
+    },
+    include: {
+      movie: true
+    }
+  });
+
+  const init = { favorites: [], hms: [], unused: [] };
+
+  if (!movies) {
+    return init;
+  }
+
+  return movies.reduce((results, item) => {
+    switch (item.type) {
+      case MovieListType.FAVORITE: {
+        results.favorites.push(item.movie);
+        break;
+      }
+      case MovieListType.HM: {
+        results.hms.push(item.movie);
+        break;
+      }
+      case MovieListType.UNUSED:
+      default: {
+        results.unused.push(item.movie);
+      }
+    }
+    return results;
+  }, init);
+}
+
+export async function addMovie({ userId, movie, type }) {
+  const users = {
+    create: [
+      {
+        userId,
+        type
+      }
+    ]
+  };
+  await prisma.movie.upsert({
+    where: {
+      id: movie.id
+    },
+    update: {
+      users
+    },
+    create: {
+      id: movie.id,
+      title: movie.title,
+      posterPath: movie.poster_path,
+      releaseDate: movie.release_date,
+      users
+    }
+  });
+
+  return await getMoviesForUser({ userId });
 }

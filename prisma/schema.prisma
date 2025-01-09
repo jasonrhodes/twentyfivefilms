@@ -38,6 +38,7 @@ model Movie {
   id          Int         @id
   createdAt   DateTime    @default(now())
   title       String
+  releaseDate DateTime    @db.Date
   posterPath  String?
   users       MoviesOnUsers[]
 }
