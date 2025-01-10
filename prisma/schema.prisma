@@ -29,14 +29,15 @@ model User {
   hashed_password    String
   slack_user_id      String?
   tokens             Token[]
-  lists              ListsOnUser[]
+  lists              List[]
 }
 
 model List {
   id          Int               @id @default(autoincrement())
   type        MovieListType
   movies      MoviesOnList[]
-  users       ListsOnUser[]
+  user        User              @relation(fields: [user_id], references: [id])
+  user_id     Int
 }
 
 model MoviesOnList {
@@ -47,15 +48,6 @@ model MoviesOnList {
   order      Int
 
   @@id(name: "movie_list_id", fields: [movie_id, list_id])
-}
-
-model ListsOnUser {
-  list       List    @relation(fields: [list_id], references: [id])
-  list_id    Int
-  user       User    @relation(fields: [user_id], references: [id])
-  user_id    Int
-
-  @@id(name: "list_user_id", fields: [list_id, user_id])
 }
 
 model Token {
