@@ -1,6 +1,6 @@
 'use server';
 
-import { PrismaClient } from '@prisma/client';
+import { MovieListType, PrismaClient } from '@prisma/client';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
 import * as logger from './logger';
@@ -153,12 +153,51 @@ export async function getAuthTokenRecord({ token }) {
 }
 
 export async function getLists({ user_id }) {
-  // TODO: NOT IMPLEMENTED
-  return {
-    favorites: [],
-    hms: [],
-    queue: []
-  };
+  logger.debug(`Attempting to get lists for user ${user_id}`);
+  const movies = await prisma.moviesOnList.findMany({
+    where: {
+      list: {
+        is: {
+          user_id
+        }
+      }
+    },
+    orderBy: [
+      {
+        order: 'asc'
+      }
+    ],
+    include: {
+      list: true,
+      movie: true
+    }
+  });
+
+  await logger.debug(() => `movies result: ${JSON.stringify(movies)}`);
+
+  const init = { favorites: [], hms: [], queue: [] };
+
+  if (!movies) {
+    return init;
+  }
+
+  return movies.reduce((results, item) => {
+    switch (item.list.type) {
+      case MovieListType.FAVORITE: {
+        results.favorites.push(item.movie);
+        break;
+      }
+      case MovieListType.HM: {
+        results.hms.push(item.movie);
+        break;
+      }
+      case MovieListType.QUEUE:
+      default: {
+        results.queue.push(item.movie);
+      }
+    }
+    return results;
+  }, init);
 }
 
 // lists should be an array of { type, movies }
