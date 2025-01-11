@@ -154,13 +154,9 @@ export async function getAuthTokenRecord({ token }) {
 
 export async function getLists({ user_id }) {
   logger.debug(`Attempting to get lists for user ${user_id}`);
-  const movies = await prisma.moviesOnList.findMany({
+  const movies = await prisma.listEntry.findMany({
     where: {
-      list: {
-        is: {
-          user_id
-        }
-      }
+      user_id
     },
     orderBy: [
       {
@@ -168,7 +164,6 @@ export async function getLists({ user_id }) {
       }
     ],
     include: {
-      list: true,
       movie: true
     }
   });
@@ -181,19 +176,19 @@ export async function getLists({ user_id }) {
     return init;
   }
 
-  return movies.reduce((results, item) => {
-    switch (item.list.type) {
+  return movies.reduce((results, entry) => {
+    switch (entry.type) {
       case MovieListType.FAVORITE: {
-        results.favorites.push(item.movie);
+        results.favorites.push(entry.movie);
         break;
       }
       case MovieListType.HM: {
-        results.hms.push(item.movie);
+        results.hms.push(entry.movie);
         break;
       }
       case MovieListType.QUEUE:
       default: {
-        results.queue.push(item.movie);
+        results.queue.push(entry.movie);
       }
     }
     return results;
@@ -202,7 +197,32 @@ export async function getLists({ user_id }) {
 
 // lists should be an array of { type, movies }
 export async function saveLists({ user_id, lists }) {
-  // TODO: NOT IMPLEMENTED
+  // This function is WIP, I re-designed the data model mid-stream
+  // const types = lists.map((list) => list.type);
+
+  // // wishing I had TypeScript right now
+  // const validTypes = Object.values(MovieListType);
+  // if (types.some((t) => !validTypes.includes(t))) {
+  //   throw new Error(
+  //     `Invalid type included in saveLists call, lists not saved (${types.join(', ')})`
+  //   );
+  // }
+
+  // const results = await prisma.$transaction([
+  //   // Step 1: Delete all incoming lists
+  //   prisma.list.deleteMany({
+  //     where: {
+  //       user_id,
+  //       type: {
+  //         in: types
+  //       }
+  //     }
+  //   }),
+  //   ...(types.map(
+  //     (type) => prisma.list.
+  //   ))
+  // ]);
+
   const summary = lists
     .map((l) => `${l.type}: ${l.movies.length} movies`)
     .join(', ');
