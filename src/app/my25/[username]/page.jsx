@@ -9,6 +9,7 @@ import { ImportMovies } from './components/ImportMovies';
 import { COUNTED, NUM_RATED } from '@/lib/constants';
 import { getSession } from '@/lib/session';
 import Link from 'next/link';
+import { getLists } from '@/lib/db';
 
 function labelFromListLength(length) {
   if (length > COUNTED) {
@@ -31,10 +32,8 @@ export default function SubmitFilms({ params }) {
   useEffect(() => {
     async function retrieve() {
       const p = await params;
-      console.log('params', p);
       if (!activeSession) {
         const session = await getSession();
-        console.log('session', session);
         if (session && session?.user?.username === p.username) {
           setActiveSession(true);
         }

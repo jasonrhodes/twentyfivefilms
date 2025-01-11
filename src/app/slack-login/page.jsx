@@ -28,7 +28,6 @@ function ShowToken() {
     async function retrieve() {
       setLoading(true);
       const record = await getAuthTokenRecord({ token: authToken });
-      console.log('found auth token record', record);
       if (record?.user) {
         setUser(record.user);
         delete record.user.hashedPassword;
@@ -53,18 +52,4 @@ function ShowToken() {
   }
 
   return <p>Redirecting...</p>;
-
-  // return (
-  //   <div>
-  //     <p>Token: {authToken}</p>
-  //     <p>User:</p>
-  //     <>
-  //       (user ? (
-  //       <pre>
-  //         <code>{JSON.stringify(user, null, 2)}</code>
-  //       </pre>
-  //       ) : null)
-  //     </>
-  //   </div>
-  // );
 }

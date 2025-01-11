@@ -5,7 +5,11 @@
 async function log(...messages) {
   if (typeof messages[0] === 'function') {
     const computedMessage = await messages[0]();
-    log(computedMessage);
+    if (Array.isArray(computedMessage)) {
+      log(...computedMessage);
+    } else {
+      log(computedMessage);
+    }
   } else {
     // eslint-disable-next-line
     console.log(...messages);
