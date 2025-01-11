@@ -36,10 +36,6 @@ export default function SubmitFilms({ params }) {
         const session = await getSession();
         if (session && session?.user?.username === p.username) {
           setActiveSession(true);
-
-          // TEST getLists() -- TODO: remove later
-          const lists = await getLists({ user_id: session.user.id });
-          console.log('found lists!', lists);
         }
       }
       const config = await getTmdbConfig();

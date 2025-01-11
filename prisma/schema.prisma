@@ -58,6 +58,6 @@ model Movie {
   title           String
   release_date    DateTime        @db.Date
   poster_path     String?
-  list_links      ListEntry[]
+  list_entries    ListEntry[]
 }
 

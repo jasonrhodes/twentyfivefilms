@@ -152,24 +152,7 @@ export async function getAuthTokenRecord({ token }) {
   });
 }
 
-export async function getLists({ user_id }) {
-  logger.debug(`Attempting to get lists for user ${user_id}`);
-  const movies = await prisma.listEntry.findMany({
-    where: {
-      user_id
-    },
-    orderBy: [
-      {
-        order: 'asc'
-      }
-    ],
-    include: {
-      movie: true
-    }
-  });
-
-  await logger.debug(() => `movies result: ${JSON.stringify(movies)}`);
-
+function sortMoviesIntoLists(movies) {
   const init = { favorites: [], hms: [], queue: [] };
 
   if (!movies) {
@@ -195,38 +178,80 @@ export async function getLists({ user_id }) {
   }, init);
 }
 
+export async function getLists({ user_id }) {
+  logger.debug(`Attempting to get lists for user ${user_id}`);
+  const movies = await prisma.listEntry.findMany({
+    where: {
+      user_id
+    },
+    orderBy: [
+      {
+        order: 'asc'
+      }
+    ],
+    include: {
+      movie: true
+    }
+  });
+
+  await logger.debug(() => `movies result: ${JSON.stringify(movies)}`);
+
+  return sortMoviesIntoLists(movies);
+}
+
 // lists should be an array of { type, movies }
 export async function saveLists({ user_id, lists }) {
-  // This function is WIP, I re-designed the data model mid-stream
-  // const types = lists.map((list) => list.type);
+  const types = lists.map((list) => list.type);
 
-  // // wishing I had TypeScript right now
-  // const validTypes = Object.values(MovieListType);
-  // if (types.some((t) => !validTypes.includes(t))) {
-  //   throw new Error(
-  //     `Invalid type included in saveLists call, lists not saved (${types.join(', ')})`
-  //   );
-  // }
+  // wishing I had TypeScript right now
+  const validTypes = Object.values(MovieListType);
+  if (types.some((t) => !validTypes.includes(t))) {
+    throw new Error(
+      `Invalid type included in saveLists call, lists not saved (${types.join(', ')})`
+    );
+  }
 
-  // const results = await prisma.$transaction([
-  //   // Step 1: Delete all incoming lists
-  //   prisma.list.deleteMany({
-  //     where: {
-  //       user_id,
-  //       type: {
-  //         in: types
-  //       }
-  //     }
-  //   }),
-  //   ...(types.map(
-  //     (type) => prisma.list.
-  //   ))
-  // ]);
+  let counters = { FAVORITE: 1, HM: 1, QUEUE: 1 };
 
-  const summary = lists
-    .map((l) => `${l.type}: ${l.movies.length} movies`)
-    .join(', ');
-  console.log(
-    `Saving ${lists.length} list(s) for user id ${user_id} (${summary})`
+  await logger.debug(
+    () =>
+      `Attempting transaction where first step will be to delete many where user_id=${user_id} and types IN (${types.join(', ')})`
   );
+
+  const [deleted, created] = await prisma.$transaction([
+    // Step 1: Delete all incoming list entries (by type+user_id)
+    prisma.listEntry.deleteMany({
+      where: {
+        user_id,
+        type: {
+          in: types
+        }
+      }
+    }),
+    // Step 2: Create all of the new entries, adding correct order value
+    prisma.listEntry.createManyAndReturn({
+      data: lists.flatMap(({ type, movies }) => {
+        return movies.map((m) => ({
+          movie_id: m.id,
+          user_id,
+          type,
+          order: counters[type]++
+        }));
+      }),
+      include: {
+        movie: true
+      }
+    })
+  ]);
+
+  await logger.debug(() => [
+    `Deleted / created requested lists (user: ${user_id}, types: ${types.join(', ')})`,
+    JSON.stringify({
+      request: { user_id, lists },
+      deleted,
+      created
+    })
+  ]);
+
+  return { deleted, created, saved: sortMoviesIntoLists(created) };
 }
