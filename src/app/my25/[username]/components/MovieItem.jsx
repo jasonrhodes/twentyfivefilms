@@ -21,7 +21,7 @@ function MovieItem({ movie, imageConfig }) {
   return (
     <>
       <div
-        className="h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center"
+        className="no-user-select h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center"
         style={{ flex: '0 0 4rem' }}
       >
         {imageUrl ? (
@@ -115,7 +115,7 @@ export function ListMovieItem({
 
   return (
     <div
-      className={`flex items-center h-24 mb-4 cursor-move ${backgroundColor()} sm:pr-2`}
+      className={`no-user-select flex items-center h-24 mb-4 cursor-move ${backgroundColor()} sm:pr-2`}
       ref={setNodeRef}
       style={style}
       {...attributes}
