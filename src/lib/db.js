@@ -182,6 +182,8 @@ export async function getLists({ user_id }) {
     }
   });
 
+  console.log('movies directly from db', movies)
+
   await logger.debug(() => `movies result: ${JSON.stringify(movies)}`);
 
   return sortMoviesIntoLists(movies);

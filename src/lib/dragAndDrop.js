@@ -95,7 +95,7 @@ export const handleDragOver = ({event, lists, setLists, setActiveDropzone, setAc
   setLists(newLists);
 }
 
-export const handleDragEnd = ({event, lists, setLists, setActiveId, setActiveDropzone, setActiveList}) => {
+export const handleDragEnd = ({event, lists, setLists, setActiveId, setActiveDropzone, setActiveList, saveListsToDb}) => {
   const { active: {id: activeId}, over: {id: overId} } = event;
   const activeList = findList(lists, activeId);
   const overList = findList(lists, overId);
@@ -108,7 +108,10 @@ export const handleDragEnd = ({event, lists, setLists, setActiveId, setActiveDro
     }
   : lists
 
-  setLists(moveOverflow(newLists));
+  const cleanedLists = moveOverflow(newLists);
+  setLists(cleanedLists);
+  saveListsToDb(cleanedLists);
+
   setActiveDropzone(null);
   setActiveList(null);
   setActiveId(null);

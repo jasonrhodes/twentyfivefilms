@@ -9,11 +9,11 @@ import { ImportMovies } from './components/ImportMovies';
 import { INITIAL_LISTS, LIST_CONFIG } from '@/lib/constants';
 import { getSession } from '@/lib/session';
 import Link from 'next/link';
-import { getLists } from '@/lib/db';
+import { getLists, saveLists } from '@/lib/db';
 
 
 export default function SubmitFilms({ params }) {
-  const [activeSession, setActiveSession] = useState(false);
+  const [activeSession, setActiveSession] = useState(null);
   const [lists, setLists] = useState(INITIAL_LISTS);
   const [listForModal, setListForModal] = useState(null);
   const [imageConfig, setImageConfig] = useState(null);
@@ -26,7 +26,10 @@ export default function SubmitFilms({ params }) {
       if (!activeSession) {
         const session = await getSession();
         if (session && session?.user?.username === p.username) {
-          setActiveSession(true);
+          setActiveSession(session);
+          const storedLists = await getLists({ user_id: session.user.id });
+          console.log('getting lists from db', storedLists)
+          setLists(storedLists);
         }
       }
       const config = await getTmdbConfig();
@@ -34,7 +37,7 @@ export default function SubmitFilms({ params }) {
     }
 
     retrieve();
-  }, [setImageConfig, activeSession, setActiveSession]);
+  }, [setImageConfig, activeSession, setActiveSession, setLists]);
 
   const resetAlert = useCallback(
     (newAlert) => {
@@ -44,6 +47,16 @@ export default function SubmitFilms({ params }) {
     },
     [setAlert, setAlertVisible]
   );
+
+  const saveListsToDb = (newLists) => {
+    console.log('saving list to DB', newLists)
+    const listsForDb = Object.entries(newLists).map(([type, movies]) => ({type, movies}))
+    console.log('saving lists to DB', listsForDb)
+    saveLists({
+      user_id: activeSession.user.id,
+      lists: listsForDb
+    });
+  }
 
   const onMovieSelect = useCallback(
     (movie) => {
@@ -67,7 +80,7 @@ export default function SubmitFilms({ params }) {
           return result;
         }, INITIAL_LISTS)
         setLists(newLists);
-        // TODO: update DB
+        saveListsToDb(newLists);
 
         resetAlert({
           style: 'success',
@@ -110,10 +123,10 @@ export default function SubmitFilms({ params }) {
 
   const onMovieRemove = useCallback(
     (movie, listType) => {
-      console.log({movie, listType})
       let newLists = {...lists};
       newLists[listType] = lists[listType].filter((f) => f.id !== movie.id);
       setLists(newLists);
+      saveListsToDb(newLists);
       resetAlert({
         style: 'danger',
         message: `${movie.title} removed from ${LIST_CONFIG[listType].label}`
@@ -154,6 +167,7 @@ export default function SubmitFilms({ params }) {
           onMovieRemove={onMovieRemove}
           setListForModal={setListForModal}
           imageConfig={imageConfig}
+          saveListsToDb={saveListsToDb}
           importMovieBox={
             <ImportMovies
               // onImportSuccess={onImportSuccess}
