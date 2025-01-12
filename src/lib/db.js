@@ -4,7 +4,6 @@ import { MovieListType, PrismaClient } from '@prisma/client';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
 import * as logger from './logger';
-import { INITIAL_LISTS } from '@/lib/constants';
 
 const STATIC_SECRET = 'my_secret';
 const prisma = new PrismaClient({

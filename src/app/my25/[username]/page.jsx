@@ -11,7 +11,6 @@ import { getSession } from '@/lib/session';
 import Link from 'next/link';
 import { getLists, saveLists } from '@/lib/db';
 
-
 export default function SubmitFilms({ params }) {
   const [activeSession, setActiveSession] = useState(null);
   const [lists, setLists] = useState(INITIAL_LISTS);
@@ -70,7 +69,6 @@ export default function SubmitFilms({ params }) {
         const newLists = Object.keys(INITIAL_LISTS).reduce((result, listType) => {
           if (listType === listForModal) {
             result[listType] = [...lists[listType], movie];
-            // Do we need to check for overflow here, or can we assume the UI didn't let us add a movie to a full list?
           } else {
             result[listType] = lists[listType].filter(lm => lm.id !== movie.id);
           }

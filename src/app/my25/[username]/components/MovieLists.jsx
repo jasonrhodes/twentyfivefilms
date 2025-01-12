@@ -9,7 +9,7 @@ import {
   useSensors,
   KeyboardSensor,
   TouchSensor,
-  MouseSensor, closestCorners
+  MouseSensor
 } from '@dnd-kit/core';
 import {
   sortableKeyboardCoordinates
@@ -18,7 +18,7 @@ import { ListMovieItem } from './MovieItem';
 import { LIST_CONFIG } from '@/lib/constants';
 import { SortableMovieList } from '@/app/my25/[username]/components/SortableMovieList';
 import { MovieListType } from '@prisma/client';
-import { debounceDragOver, handleDragEnd, handleDragOver, handleDragStart, moveOverflow } from '@/lib/dragAndDrop';
+import { debounceDragOver, handleDragEnd, handleDragOver, handleDragStart } from '@/lib/dragAndDrop';
 import { keyCodeListener } from '@/lib/keyCodeListener';
 
 class MyMouserSensor extends MouseSensor {
@@ -42,8 +42,8 @@ export function MovieLists({
 }) {
   const [activeId, setActiveId] = useState(null);
   const activeMovie = Object.values(lists).flat().find((movie) => movie.id === activeId);
-  const [activeList, setActiveList] = useState(null)
-  const [activeDropZone, setActiveDropzone] = useState(null)
+  const [activeList, setActiveList] = useState(null);
+  const [activeDropZone, setActiveDropzone] = useState(null);
 
   const sensors = useSensors(
     useSensor(MyMouserSensor),
@@ -60,9 +60,9 @@ export function MovieLists({
 
   useEffect(() => keyCodeListener('Enter', () => {
     if (lists.FAVORITE.length < LIST_CONFIG.FAVORITE.limit) {
-      setListForModal(MovieListType.FAVORITE)
+      setListForModal(MovieListType.FAVORITE);
     } else if (lists.HM.length < LIST_CONFIG.HM.limit) {
-      setListForModal(MovieListType.HM)
+      setListForModal(MovieListType.HM);
     }
   }), []);
 

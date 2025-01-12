@@ -65,15 +65,10 @@ export const handleDragOver = ({event, lists, setLists, setActiveDropzone}) => {
 
   let newIndex;
   if (overId in lists) {
-    // We're at the root droppable of a list
     newIndex = overMovies.length + 1;
   } else {
-    const isBelowLastItem =
-      over &&
-      overIndex === overMovies.length - 1;
-
+    const isBelowLastItem = over && overIndex === overMovies.length - 1;
     const modifier = isBelowLastItem ? 1 : 0;
-
     newIndex = overIndex >= 0 ? overIndex + modifier : overMovies.length + 1;
   }
 

@@ -1,13 +1,10 @@
 export const MAX_IMPORT_COUNT = 500;
 export const INVALID_URL_ERROR = 'Invalid URL';
-
-
 export const INITIAL_LISTS = {
   FAVORITE: [],
   HM: [],
   QUEUE: []
 }
-
 export const LIST_CONFIG = {
   FAVORITE: {
     label: 'Top 10',

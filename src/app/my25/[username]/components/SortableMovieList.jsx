@@ -1,6 +1,6 @@
 import { ListMovieItem } from '@/app/my25/[username]/components/MovieItem';
 import React from 'react';
-import { rectSortingStrategy, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { LIST_CONFIG } from '@/lib/constants';
 
@@ -35,9 +35,9 @@ export function SortableMovieList({
   movieContainerClass="",
   itemClass=""
 }) {
-  const listConfig = LIST_CONFIG[listType]
+  const listConfig = LIST_CONFIG[listType];
   const { setNodeRef } = useDroppable({id: listType});
-  const listIsFull = movies.length >= listConfig.limit
+  const listIsFull = movies.length >= listConfig.limit;
   const listIsOverflowing = movies.length > listConfig.limit;
   return <SortableContext
     id={listType}
