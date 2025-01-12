@@ -218,31 +218,44 @@ export async function saveLists({ user_id, lists }) {
       `Attempting transaction where first step will be to delete many where user_id=${user_id} and types IN (${types.join(', ')})`
   );
 
-  const [deleted, created] = await prisma.$transaction([
-    // Step 1: Delete all incoming list entries (by type+user_id)
-    prisma.listEntry.deleteMany({
-      where: {
-        user_id,
-        type: {
-          in: types
-        }
-      }
-    }),
-    // Step 2: Create all of the new entries, adding correct order value
-    prisma.listEntry.createManyAndReturn({
-      data: lists.flatMap(({ type, movies }) => {
-        return movies.map((m) => ({
-          movie_id: m.id,
-          user_id,
-          type,
-          order: counters[type]++
-        }));
+  const [createdMovies, deletedEntries, createdEntries] =
+    await prisma.$transaction([
+      // Step 1: Upsert all incoming movies to be sure they're added
+      prisma.movie.createMany({
+        data: lists.flatMap((list) =>
+          list.movies.map(({ id, title, release_date, poster_path }) => ({
+            id,
+            title,
+            release_date,
+            poster_path
+          }))
+        ),
+        skipDuplicates: true
       }),
-      include: {
-        movie: true
-      }
-    })
-  ]);
+      // Step 2: Delete all incoming list entries (by type+user_id)
+      prisma.listEntry.deleteMany({
+        where: {
+          user_id,
+          type: {
+            in: types
+          }
+        }
+      }),
+      // Step 2: Create all of the new entries, adding correct order value
+      prisma.listEntry.createManyAndReturn({
+        data: lists.flatMap(({ type, movies }) => {
+          return movies.map((m) => ({
+            movie_id: m.id,
+            user_id,
+            type,
+            order: counters[type]++
+          }));
+        }),
+        include: {
+          movie: true
+        }
+      })
+    ]);
 
   await logger.debug(() => [
     `Deleted / created requested lists (user: ${user_id}, types: ${types.join(', ')})`,
@@ -253,5 +266,10 @@ export async function saveLists({ user_id, lists }) {
     })
   ]);
 
-  return { deleted, created, saved: sortMoviesIntoLists(created) };
+  return {
+    createdMovies,
+    deletedEntries,
+    createdEntries,
+    lists: sortMoviesIntoLists(created)
+  };
 }
