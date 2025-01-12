@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { buildImageUrl } from '@/lib/buildImageUrl';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
+import { useDraggable } from '@dnd-kit/core';
 
 function MovieItem({ movie, imageConfig }) {
   const imageUrl = useMemo(
@@ -44,12 +45,12 @@ function MovieItem({ movie, imageConfig }) {
   );
 }
 
-function MovieDropZone() {
+function MovieDropZone({listIsOverflowing}) {
   return (
     <>
       <div className="h-24" style={{ flex: '0 0 4rem' }} />
       <div className="pr-3 pl-3 w-full flex-auto">
-        <b>Drop Here</b>
+        <b>{listIsOverflowing ? 'List Full' : 'Drop Here'}</b>
       </div>
     </>
   );
@@ -84,10 +85,11 @@ export function SearchMovieItem({ movie, onSelect, selected, imageConfig }) {
 
 export function ListMovieItem({
   movie,
-  onRemove,
+  onRemoveButton,
   imageConfig,
   dragging,
-  dropping
+  dropping,
+  listIsOverflowing
 }) {
   const [deleteStyle, setDeleteStyle] = useState(false);
 
@@ -100,7 +102,9 @@ export function ListMovieItem({
   };
 
   const backgroundColor = () => {
-    if (dropping) {
+    if (dropping && listIsOverflowing) {
+      return 'bg-red-100 dark:bg-red-800 border-dashed border-red-300 dark:border-red-600 color-red-300 dark:color-red-800 border-4 text-opacity-50';
+    } else if (dropping) {
       return 'bg-indigo-100 dark:bg-blue-900 border-dashed border-indigo-300 dark:border-blue-700 color-indigo-300 dark:color-blue-700 border-4 text-opacity-50';
     } else if (dragging) {
       return 'opacity-90 bg-gray-100 dark:bg-gray-800 scale-95';
@@ -119,7 +123,7 @@ export function ListMovieItem({
       {...listeners}
     >
       {dropping ? (
-        <MovieDropZone />
+        <MovieDropZone listIsOverflowing={listIsOverflowing} />
       ) : (
         <>
           <MovieItem imageConfig={imageConfig} movie={movie} />
@@ -127,7 +131,7 @@ export function ListMovieItem({
             className="cursor-pointer bg-red-100 dark:bg-red-900 hover:bg-red-700 dark:hover:bg-red-700 pr-2 pl-2 rounded-2xl hover:text-white dark:text-white deleteButton"
             onMouseEnter={() => setDeleteStyle(true)}
             onMouseLeave={() => setDeleteStyle(false)}
-            onClick={() => onRemove(movie)}
+            onClick={() => onRemoveButton(movie)}
           >
             <span className="text-2xl leading-none pointer-events-none">-</span>
           </div>

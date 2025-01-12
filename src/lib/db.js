@@ -4,6 +4,7 @@ import { MovieListType, PrismaClient } from '@prisma/client';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
 import * as logger from './logger';
+import { INITIAL_LISTS } from '@/lib/constants';
 
 const STATIC_SECRET = 'my_secret';
 const prisma = new PrismaClient({
@@ -153,27 +154,14 @@ export async function getAuthTokenRecord({ token }) {
 }
 
 function sortMoviesIntoLists(movies) {
-  const init = { favorites: [], hms: [], queue: [] };
+  const init = INITIAL_LISTS;
 
   if (!movies) {
     return init;
   }
 
   return movies.reduce((results, entry) => {
-    switch (entry.type) {
-      case MovieListType.FAVORITE: {
-        results.favorites.push(entry.movie);
-        break;
-      }
-      case MovieListType.HM: {
-        results.hms.push(entry.movie);
-        break;
-      }
-      case MovieListType.QUEUE:
-      default: {
-        results.queue.push(entry.movie);
-      }
-    }
+    results[entry.type].push(entry.movie);
     return results;
   }, init);
 }

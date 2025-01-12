@@ -44,7 +44,7 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
           />
           <button
             onClick={handleImport}
-            className="p-2 m-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            className="p-2 m-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-300"
           >
             Import
           </button>
@@ -52,7 +52,7 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
       ) : (
         <button
           onClick={() => setIsExpanded(true)}
-          className="p-2 m-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+          className="p-2 m-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-300"
         >
           {isImporting ? 'Importing...' : 'Import From Letterboxd'}
         </button>

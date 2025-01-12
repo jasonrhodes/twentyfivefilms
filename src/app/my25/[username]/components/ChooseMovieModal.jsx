@@ -10,7 +10,8 @@ export function ChooseMovieModal({
   initialValue = '',
   onSelect,
   imageConfig,
-  setShowModal
+  listType,
+  closeModal
 }) {
   const [val, setVal] = useState(initialValue);
   const [movies, setMovies] = useState([]);
@@ -25,7 +26,7 @@ export function ChooseMovieModal({
     [setVal]
   );
 
-  const cancelSearch = useCallback(() => setShowModal(false), [setShowModal]);
+  const cancelSearch = useCallback(() => closeModal(), [closeModal]);
 
   const onKeyDown = useCallback((event) => {
     if (event.code === 'ArrowUp') {
