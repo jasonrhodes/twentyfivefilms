@@ -17,7 +17,7 @@ export function AlertBox({ alert: { message, style }, visible }) {
 
   return (
     <div
-      className={`border-2 p-2 fixed h-[50px] top-[-50px] ${styleClass}`}
+      className={`border-2 p-2 fixed h-[50px] top-[-50px] z-10 ${styleClass}`}
       style={transitionStyle}
     >
       {message}

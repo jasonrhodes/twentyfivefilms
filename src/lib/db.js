@@ -154,7 +154,11 @@ export async function getAuthTokenRecord({ token }) {
 }
 
 function sortMoviesIntoLists(movies) {
-  const init = INITIAL_LISTS;
+  const init = {
+    FAVORITE: [],
+    HM: [],
+    QUEUE: []
+  };
 
   if (!movies) {
     return init;
@@ -181,8 +185,6 @@ export async function getLists({ user_id }) {
       movie: true
     }
   });
-
-  console.log('movies directly from db', movies)
 
   await logger.debug(() => `movies result: ${JSON.stringify(movies)}`);
 
@@ -216,7 +218,7 @@ export async function saveLists({ user_id, lists }) {
           list.movies.map(({ id, title, release_date, poster_path }) => ({
             id,
             title,
-            release_date,
+            release_date: new Date(release_date).toISOString(),
             poster_path
           }))
         ),
@@ -251,8 +253,8 @@ export async function saveLists({ user_id, lists }) {
     `Deleted / created requested lists (user: ${user_id}, types: ${types.join(', ')})`,
     JSON.stringify({
       request: { user_id, lists },
-      deleted,
-      created
+      deletedEntries,
+      createdMovies
     })
   ]);
 
@@ -260,6 +262,6 @@ export async function saveLists({ user_id, lists }) {
     createdMovies,
     deletedEntries,
     createdEntries,
-    lists: sortMoviesIntoLists(created)
+    lists: sortMoviesIntoLists(createdEntries)
   };
 }

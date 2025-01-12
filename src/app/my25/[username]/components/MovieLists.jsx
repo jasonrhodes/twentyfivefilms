@@ -93,7 +93,7 @@ export function MovieLists({
           collisionDetection={closestCenter}
           onDragEnd={(event) => handleDragEnd({event, lists, setLists, setActiveId, setActiveDropzone, setActiveList, saveListsToDb})}
           onDragStart={(event) => handleDragStart({event, setActiveId, lists, setActiveList})}
-          onDragOver={debounceDragOver((event) => handleDragOver({event, lists, setLists, setActiveDropzone, setActiveList}), 10)}
+          onDragOver={debounceDragOver((event) => handleDragOver({event, lists, setLists, setActiveDropzone}), 10)}
           sensors={sensors}
         >
             <div className="flex-col md:flex-row flex gap-2">

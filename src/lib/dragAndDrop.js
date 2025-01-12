@@ -9,14 +9,14 @@ const findList = (lists, id) => {
 }
 
 export const debounceDragOver = (func, wait = 10) => {
-  let timeout; // for the setTimeout function and so it can be cleared
-  return function executedFunction(...args) { // the function returned from debounce
-    const later = () => { // this is the delayed function
-      clearTimeout(timeout); // clears the timeout when the function is called
-      func(...args); // calls the function
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
     };
-    clearTimeout(timeout); // this clears the timeout each time the function is run again preventing later from running until we stop calling the function
-    timeout = setTimeout(later, wait); // this sets the time out to run after the wait period
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
   };
 };
 
@@ -45,9 +45,8 @@ export const handleDragStart = ({event, setActiveId, lists, setActiveList}) => {
   setActiveList(activeList);
 }
 
-export const handleDragOver = ({event, lists, setLists, setActiveDropzone, setActiveList}) => {
+export const handleDragOver = ({event, lists, setLists, setActiveDropzone}) => {
   const {active: {id: activeId}, over} = event;
-  console.log(event)
   const overId = over.id
 
   const activeList = findList(lists, activeId);
@@ -89,8 +88,6 @@ export const handleDragOver = ({event, lists, setLists, setActiveDropzone, setAc
       ...lists[overList].slice(newIndex, lists[overList].length)
     ]
   };
-
-  console.log({lists, newLists})
 
   setLists(newLists);
 }

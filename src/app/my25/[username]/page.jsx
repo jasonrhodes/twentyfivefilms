@@ -28,7 +28,6 @@ export default function SubmitFilms({ params }) {
         if (session && session?.user?.username === p.username) {
           setActiveSession(session);
           const storedLists = await getLists({ user_id: session.user.id });
-          console.log('getting lists from db', storedLists)
           setLists(storedLists);
         }
       }
@@ -49,9 +48,7 @@ export default function SubmitFilms({ params }) {
   );
 
   const saveListsToDb = (newLists) => {
-    console.log('saving list to DB', newLists)
-    const listsForDb = Object.entries(newLists).map(([type, movies]) => ({type, movies}))
-    console.log('saving lists to DB', listsForDb)
+    const listsForDb = Object.entries(newLists).map(([type, movies]) => ({type, movies}));
     saveLists({
       user_id: activeSession.user.id,
       lists: listsForDb
@@ -92,27 +89,40 @@ export default function SubmitFilms({ params }) {
     [lists, setLists, setListForModal, listForModal]
   );
 
-  // const onImportSuccess = useCallback(
-  //   (importedMovies) => {
-  //     const newMovies = importedMovies.filter((importedMovie) => {
-  //       return !lists.some((movie) => movie.id === importedMovie.id);
-  //     });
-  //
-  //     const newFavourites = [...lists, ...newMovies];
-  //     setLists(newFavourites);
-  //     const numAdded = newMovies.length;
-  //     const numSkipped = importedMovies.length - numAdded;
-  //     let message = `Imported ${numAdded} new movies.`;
-  //     if (numSkipped > 0) {
-  //       message += ` (${numSkipped} skipped duplicates)`;
-  //     }
-  //     resetAlert({
-  //       style: 'success',
-  //       message: message
-  //     });
-  //   },
-  //   [lists, setLists]
-  // );
+  const onImportSuccess = useCallback(
+    (importedMovies) => {
+      const existingMovies = Object.values(lists).flat();
+      const newMovies = importedMovies.filter((importedMovie) => {
+        return !existingMovies.some((movie) => movie.id === importedMovie.id);
+      });
+      const numAdded = newMovies.length;
+      const newLists = {...lists};
+
+      if (lists.FAVORITE.length || lists.HM.length) {
+        newLists.QUEUE = [...newLists.QUEUE, ...newMovies];
+      } else {
+        const newFavorites = newMovies.splice(0, LIST_CONFIG.FAVORITE.limit);
+        const newHonorableMentions = newMovies.splice(0, LIST_CONFIG.HM.limit);
+        newLists.FAVORITE = newFavorites;
+        newLists.HM = newHonorableMentions;
+        newLists.QUEUE = [...newLists.QUEUE, ...newMovies];
+      }
+
+      setLists(newLists);
+      saveListsToDb(newLists);
+
+      const numSkipped = importedMovies.length - numAdded;
+      let message = `Imported ${numAdded} new movies.`;
+      if (numSkipped > 0) {
+        message += ` (${numSkipped} skipped duplicates)`;
+      }
+      resetAlert({
+        style: 'success',
+        message: message
+      });
+    },
+    [lists, setLists]
+  );
 
   const onImportFailure = useCallback((importFailureMessage) => {
     resetAlert({
@@ -170,8 +180,8 @@ export default function SubmitFilms({ params }) {
           saveListsToDb={saveListsToDb}
           importMovieBox={
             <ImportMovies
-              // onImportSuccess={onImportSuccess}
-              // onImportFailure={onImportFailure}
+              onImportSuccess={onImportSuccess}
+              onImportFailure={onImportFailure}
             />
           }
         />

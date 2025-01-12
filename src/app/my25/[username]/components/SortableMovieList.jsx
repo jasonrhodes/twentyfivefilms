@@ -71,7 +71,6 @@ export function SortableMovieList({
         </Draggable>
       ))}
       </div>
-      {!isActiveDropzone && <div className="min-h-[112px]"/>}
       {activeHasLeftList && <div className="min-h-[112px]"/>}
     </div>
   </SortableContext>
