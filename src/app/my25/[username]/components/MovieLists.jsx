@@ -52,7 +52,7 @@ export function MovieLists({
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 200,
+        delay: 100,
         tolerance: 8
       }
     })
