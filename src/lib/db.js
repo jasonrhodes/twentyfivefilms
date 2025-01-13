@@ -8,7 +8,7 @@ import * as logger from './logger';
 const STATIC_SECRET = 'my_secret';
 const globalForPrisma = global;
 
-export const prisma =
+const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     omit: {
