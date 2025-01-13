@@ -21,7 +21,7 @@ function MovieItem({ movie, imageConfig }) {
   return (
     <>
       <div
-        className="h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center"
+        className="no-user-select h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center"
         style={{ flex: '0 0 4rem' }}
       >
         {imageUrl ? (
@@ -44,12 +44,12 @@ function MovieItem({ movie, imageConfig }) {
   );
 }
 
-function MovieDropZone() {
+function MovieDropZone({listIsOverflowing}) {
   return (
     <>
       <div className="h-24" style={{ flex: '0 0 4rem' }} />
       <div className="pr-3 pl-3 w-full flex-auto">
-        <b>Drop Here</b>
+        <b>{listIsOverflowing ? 'List Full' : 'Drop Here'}</b>
       </div>
     </>
   );
@@ -84,10 +84,11 @@ export function SearchMovieItem({ movie, onSelect, selected, imageConfig }) {
 
 export function ListMovieItem({
   movie,
-  onRemove,
+  onRemoveButton,
   imageConfig,
   dragging,
-  dropping
+  dropping,
+  listIsOverflowing
 }) {
   const [deleteStyle, setDeleteStyle] = useState(false);
 
@@ -100,7 +101,9 @@ export function ListMovieItem({
   };
 
   const backgroundColor = () => {
-    if (dropping) {
+    if (dropping && listIsOverflowing) {
+      return 'bg-red-100 dark:bg-red-800 border-dashed border-red-300 dark:border-red-600 color-red-300 dark:color-red-800 border-4 text-opacity-50';
+    } else if (dropping) {
       return 'bg-indigo-100 dark:bg-blue-900 border-dashed border-indigo-300 dark:border-blue-700 color-indigo-300 dark:color-blue-700 border-4 text-opacity-50';
     } else if (dragging) {
       return 'opacity-90 bg-gray-100 dark:bg-gray-800 scale-95';
@@ -112,14 +115,14 @@ export function ListMovieItem({
 
   return (
     <div
-      className={`flex items-center h-24 mb-4 cursor-move ${backgroundColor()} sm:pr-2`}
+      className={`no-user-select flex items-center h-24 mb-4 cursor-move ${backgroundColor()} sm:pr-2`}
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
     >
       {dropping ? (
-        <MovieDropZone />
+        <MovieDropZone listIsOverflowing={listIsOverflowing} />
       ) : (
         <>
           <MovieItem imageConfig={imageConfig} movie={movie} />
@@ -127,7 +130,7 @@ export function ListMovieItem({
             className="cursor-pointer bg-red-100 dark:bg-red-900 hover:bg-red-700 dark:hover:bg-red-700 pr-2 pl-2 rounded-2xl hover:text-white dark:text-white deleteButton"
             onMouseEnter={() => setDeleteStyle(true)}
             onMouseLeave={() => setDeleteStyle(false)}
-            onClick={() => onRemove(movie)}
+            onClick={() => onRemoveButton(movie)}
           >
             <span className="text-2xl leading-none pointer-events-none">-</span>
           </div>

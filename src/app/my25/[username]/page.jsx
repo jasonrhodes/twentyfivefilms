@@ -3,28 +3,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
-import { FavoriteMovieList } from './components/FavoriteMovieList';
+import { MovieLists } from './components/MovieLists';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
 import { ImportMovies } from './components/ImportMovies';
-import { COUNTED, NUM_RATED } from '@/lib/constants';
+import { INITIAL_LISTS, LIST_CONFIG } from '@/lib/constants';
 import { getSession } from '@/lib/session';
 import Link from 'next/link';
-import { getLists } from '@/lib/db';
-
-function labelFromListLength(length) {
-  if (length > COUNTED) {
-    return 'Uncounted';
-  } else if (length > NUM_RATED) {
-    return 'Honorable Mentions';
-  } else {
-    return `Top ${NUM_RATED}`;
-  }
-}
+import { getLists, saveLists } from '@/lib/db';
 
 export default function SubmitFilms({ params }) {
-  const [activeSession, setActiveSession] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [favorites, setFavorites] = useState([]);
+  const [activeSession, setActiveSession] = useState(null);
+  const [lists, setLists] = useState(INITIAL_LISTS);
+  const [listForModal, setListForModal] = useState(null);
   const [imageConfig, setImageConfig] = useState(null);
   const [alert, setAlert] = useState({});
   const [alertVisible, setAlertVisible] = useState(false);
@@ -35,7 +25,9 @@ export default function SubmitFilms({ params }) {
       if (!activeSession) {
         const session = await getSession();
         if (session && session?.user?.username === p.username) {
-          setActiveSession(true);
+          setActiveSession(session);
+          const storedLists = await getLists({ user_id: session.user.id });
+          setLists(storedLists);
         }
       }
       const config = await getTmdbConfig();
@@ -43,7 +35,7 @@ export default function SubmitFilms({ params }) {
     }
 
     retrieve();
-  }, [setImageConfig, activeSession, setActiveSession]);
+  }, [setImageConfig, activeSession, setActiveSession, setLists]);
 
   const resetAlert = useCallback(
     (newAlert) => {
@@ -54,40 +46,69 @@ export default function SubmitFilms({ params }) {
     [setAlert, setAlertVisible]
   );
 
-  const onFavoriteSelect = useCallback(
+  const saveListsToDb = (newLists) => {
+    const listsForDb = Object.entries(newLists).map(([type, movies]) => ({type, movies}));
+    saveLists({
+      user_id: activeSession.user.id,
+      lists: listsForDb
+    });
+  }
+
+  const onMovieSelect = useCallback(
     (movie) => {
       if (!movie) {
         return;
       }
 
-      if (favorites.some((fav) => fav.id === movie.id)) {
+      if (lists[listForModal].some(lm => lm.id === movie.id)) {
         resetAlert({
           style: 'warning',
-          message: `${movie.title} is already on list`
+          message: `${movie.title} is already on ${LIST_CONFIG[listForModal].label}`
         });
       } else {
-        const newFavourites = [...favorites, movie];
-        setFavorites(newFavourites);
-        setShowModal(false);
-        const listName = labelFromListLength(newFavourites.length);
+        const newLists = Object.keys(INITIAL_LISTS).reduce((result, listType) => {
+          if (listType === listForModal) {
+            result[listType] = [...lists[listType], movie];
+          } else {
+            result[listType] = lists[listType].filter(lm => lm.id !== movie.id);
+          }
+          return result;
+        }, INITIAL_LISTS)
+        setLists(newLists);
+        saveListsToDb(newLists);
+
         resetAlert({
           style: 'success',
-          message: `${movie.title} added to ${listName}`
+          message: `${movie.title} added to ${LIST_CONFIG[listForModal].label}`
         });
+        setListForModal(null);
       }
     },
-    [favorites, setFavorites, setShowModal]
+    [lists, setLists, setListForModal, listForModal]
   );
 
   const onImportSuccess = useCallback(
     (importedMovies) => {
+      const existingMovies = Object.values(lists).flat();
       const newMovies = importedMovies.filter((importedMovie) => {
-        return !favorites.some((movie) => movie.id === importedMovie.id);
+        return !existingMovies.some((movie) => movie.id === importedMovie.id);
       });
-
-      const newFavourites = [...favorites, ...newMovies];
-      setFavorites(newFavourites);
       const numAdded = newMovies.length;
+      const newLists = {...lists};
+
+      if (lists.FAVORITE.length || lists.HM.length) {
+        newLists.QUEUE = [...newLists.QUEUE, ...newMovies];
+      } else {
+        const newFavorites = newMovies.splice(0, LIST_CONFIG.FAVORITE.limit);
+        const newHonorableMentions = newMovies.splice(0, LIST_CONFIG.HM.limit);
+        newLists.FAVORITE = newFavorites;
+        newLists.HM = newHonorableMentions;
+        newLists.QUEUE = [...newLists.QUEUE, ...newMovies];
+      }
+
+      setLists(newLists);
+      saveListsToDb(newLists);
+
       const numSkipped = importedMovies.length - numAdded;
       let message = `Imported ${numAdded} new movies.`;
       if (numSkipped > 0) {
@@ -98,7 +119,7 @@ export default function SubmitFilms({ params }) {
         message: message
       });
     },
-    [favorites, setFavorites]
+    [lists, setLists]
   );
 
   const onImportFailure = useCallback((importFailureMessage) => {
@@ -108,16 +129,18 @@ export default function SubmitFilms({ params }) {
     });
   });
 
-  const onFavoriteRemove = useCallback(
-    (movie) => {
-      const updated = favorites.filter((f) => f.id !== movie.id);
-      setFavorites(updated);
+  const onMovieRemove = useCallback(
+    (movie, listType) => {
+      let newLists = {...lists};
+      newLists[listType] = lists[listType].filter((f) => f.id !== movie.id);
+      setLists(newLists);
+      saveListsToDb(newLists);
       resetAlert({
         style: 'danger',
-        message: `${movie.title} removed from list`
+        message: `${movie.title} removed from ${LIST_CONFIG[listType].label}`
       });
     },
-    [favorites, setFavorites]
+    [lists, setLists]
   );
 
   if (!activeSession) {
@@ -131,22 +154,28 @@ export default function SubmitFilms({ params }) {
     );
   }
 
+  if (!imageConfig) {
+    return null
+  }
+
   return (
     <>
       <AlertBox alert={alert} visible={alertVisible} />
-      {showModal ? (
+      {!!listForModal ? (
         <ChooseMovieModal
-          onSelect={onFavoriteSelect}
+          onSelect={onMovieSelect}
           imageConfig={imageConfig}
-          setShowModal={setShowModal}
+          listType={listForModal}
+          closeModal={() => setListForModal(null)}
         />
       ) : (
-        <FavoriteMovieList
-          favorites={favorites}
-          setFavorites={setFavorites}
-          onFavoriteRemove={onFavoriteRemove}
-          setShowModal={setShowModal}
+        <MovieLists
+          lists={lists}
+          setLists={setLists}
+          onMovieRemove={onMovieRemove}
+          setListForModal={setListForModal}
           imageConfig={imageConfig}
+          saveListsToDb={saveListsToDb}
           importMovieBox={
             <ImportMovies
               onImportSuccess={onImportSuccess}

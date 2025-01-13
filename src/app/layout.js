@@ -25,8 +25,8 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="p-2 sm:p-8 pb-20 min-h-svh font-[family-name:var(--font-geist-sans)] flex justify-between items-center flex-col">
-          <main className="flex pb-20 items-center justify-center w-full lg:w-[calc(1024px - 2rem)]">
+        <div className="p-[8px] sm:p-[32px] pb-20 min-h-svh font-[family-name:var(--font-geist-sans)] flex justify-between items-center flex-col">
+          <main className="flex pb-20 items-center justify-center w-full lg:w-[960px]">
             {children}
           </main>
           <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm">

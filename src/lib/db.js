@@ -153,27 +153,18 @@ export async function getAuthTokenRecord({ token }) {
 }
 
 function sortMoviesIntoLists(movies) {
-  const init = { favorites: [], hms: [], queue: [] };
+  const init = {
+    FAVORITE: [],
+    HM: [],
+    QUEUE: []
+  };
 
   if (!movies) {
     return init;
   }
 
   return movies.reduce((results, entry) => {
-    switch (entry.type) {
-      case MovieListType.FAVORITE: {
-        results.favorites.push(entry.movie);
-        break;
-      }
-      case MovieListType.HM: {
-        results.hms.push(entry.movie);
-        break;
-      }
-      case MovieListType.QUEUE:
-      default: {
-        results.queue.push(entry.movie);
-      }
-    }
+    results[entry.type].push(entry.movie);
     return results;
   }, init);
 }
@@ -226,7 +217,7 @@ export async function saveLists({ user_id, lists }) {
           list.movies.map(({ id, title, release_date, poster_path }) => ({
             id,
             title,
-            release_date,
+            release_date: new Date(release_date).toISOString(),
             poster_path
           }))
         ),
@@ -261,8 +252,8 @@ export async function saveLists({ user_id, lists }) {
     `Deleted / created requested lists (user: ${user_id}, types: ${types.join(', ')})`,
     JSON.stringify({
       request: { user_id, lists },
-      deleted,
-      created
+      deletedEntries,
+      createdMovies
     })
   ]);
 
@@ -270,6 +261,6 @@ export async function saveLists({ user_id, lists }) {
     createdMovies,
     deletedEntries,
     createdEntries,
-    lists: sortMoviesIntoLists(created)
+    lists: sortMoviesIntoLists(createdEntries)
   };
 }
