@@ -39,7 +39,8 @@ export function MovieLists({
   imageConfig,
   importMovieBox,
   saveListsToDb,
-  onClearList
+  onClearList,
+  resetAlert
 }) {
   const [activeId, setActiveId] = useState(null);
   const activeMovie = Object.values(lists).flat().find((movie) => movie.id === activeId);
@@ -92,7 +93,7 @@ export function MovieLists({
       <section>
         <DndContext
           collisionDetection={closestCenter}
-          onDragEnd={(event) => handleDragEnd({event, lists, setLists, setActiveId, setActiveDropzone, setActiveList, saveListsToDb})}
+          onDragEnd={(event) => handleDragEnd({event, lists, setLists, setActiveId, setActiveDropzone, setActiveList, saveListsToDb, resetAlert})}
           onDragStart={(event) => handleDragStart({event, setActiveId, lists, setActiveList})}
           onDragOver={debounceDragOver((event) => handleDragOver({event, lists, setLists, setActiveDropzone}), 10)}
           sensors={sensors}

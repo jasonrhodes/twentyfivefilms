@@ -194,6 +194,7 @@ export default function SubmitFilms({ params }) {
           imageConfig={imageConfig}
           saveListsToDb={saveListsToDb}
           onClearList={onClearList}
+          resetAlert={resetAlert}
           importMovieBox={
             <ImportMovies
               onImportSuccess={onImportSuccess}
