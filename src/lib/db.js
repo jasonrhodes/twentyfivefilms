@@ -6,13 +6,25 @@ import * as session from '@/lib/session';
 import * as logger from './logger';
 
 const STATIC_SECRET = 'my_secret';
-const prisma = new PrismaClient({
-  omit: {
-    user: {
-      hashed_password: true
+const globalForPrisma = global;
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    omit: {
+      user: {
+        hashed_password: true
+      }
     }
-  }
-});
+  });
+
+// store global singleton of prisma to avoid hot reload
+// creating too many client instances
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
+
+export { MovieListType };
 
 export async function hashPassword(password) {
   const hmac = createHmac('sha256', STATIC_SECRET);
