@@ -15,7 +15,8 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { ListMovieItem } from './MovieItem';
 import { LIST_CONFIG } from '@/lib/constants';
 import { SortableMovieList } from '@/app/my25/[username]/components/SortableMovieList';
-import { MovieListType } from '@/lib/db';
+import { MovieListType } from '@prisma/client';
+
 import {
   debounceDragOver,
   handleDragEnd,
