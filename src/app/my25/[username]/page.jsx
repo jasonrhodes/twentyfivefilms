@@ -143,6 +143,23 @@ export default function SubmitFilms({ params }) {
     [lists, setLists]
   );
 
+  const onClearList = useCallback(
+    (listType) => {
+      const deletedCount = lists[listType].length;
+      let newLists = {
+        ...lists,
+        [listType]: []
+      };
+      setLists(newLists);
+      saveListsToDb(newLists);
+      resetAlert({
+        style: 'danger',
+        message: `${deletedCount} movies removed from ${LIST_CONFIG[listType].label}`
+      });
+    },
+    [lists, setLists]
+  );
+
   if (!activeSession) {
     return (
       <p>
@@ -176,6 +193,7 @@ export default function SubmitFilms({ params }) {
           setListForModal={setListForModal}
           imageConfig={imageConfig}
           saveListsToDb={saveListsToDb}
+          onClearList={onClearList}
           importMovieBox={
             <ImportMovies
               onImportSuccess={onImportSuccess}

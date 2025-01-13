@@ -32,7 +32,7 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
   };
 
   return (
-    <div className="flex flex-col items-center m-5">
+    <div className="flex flex-col items-center m-2">
       {isExpanded ? (
         <div className="flex flex-row items-center">
           <input
@@ -40,7 +40,7 @@ export function ImportMovies({ onImportSuccess, onImportFailure }) {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Enter Public Letterboxd List URL"
-            className="p-2 m-2 border border-gray-300 rounded w-72"
+            className="border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 m-2 w-64 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
           <button
             onClick={handleImport}

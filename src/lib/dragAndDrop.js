@@ -21,22 +21,27 @@ export const debounceDragOver = (func, wait = 10) => {
 };
 
 const moveOverflow = (lists) => {
-  const overFlowingListType = Object.keys(LIST_CONFIG)
-    .find((listType) => LIST_CONFIG[listType].limit && lists[listType].length > LIST_CONFIG[listType].limit);
-
-  if (overFlowingListType) {
-    let overflowingList = lists[overFlowingListType]
-    const overflowCount = lists[overFlowingListType].length - LIST_CONFIG[overFlowingListType].limit
-    const overflow = overflowingList.splice(-overflowCount, overflowCount)
-
-    return {
+  if (lists.FAVORITE.length > LIST_CONFIG.FAVORITE.limit) {
+    const overflowCount = lists.FAVORITE.length - LIST_CONFIG.FAVORITE.limit;
+    const overflow = lists.FAVORITE.splice(-overflowCount, overflowCount);
+    lists = {
       ...lists,
-      [overFlowingListType]: overflowingList,
-      QUEUE: [...overflow, ...lists.QUEUE]
+      FAVORITE: lists.FAVORITE,
+      HM: [...overflow, ...lists.HM]
     };
-  } else {
-    return lists;
   }
+
+  if (lists.HM.length > LIST_CONFIG.HM.limit) {
+    const overflowCount = lists.HM.length - LIST_CONFIG.HM.limit;
+    const overflow = lists.HM.splice(-overflowCount, overflowCount);
+    lists = {
+      ...lists,
+      HM: lists.HM,
+      QUEUE: [...overflow, ...lists.HM]
+    };
+  }
+
+  return lists;
 }
 
 export const handleDragStart = ({event, setActiveId, lists, setActiveList}) => {
