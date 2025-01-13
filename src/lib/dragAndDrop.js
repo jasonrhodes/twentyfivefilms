@@ -26,7 +26,6 @@ const moveOverflow = (lists) => {
     const overflow = lists.FAVORITE.splice(-overflowCount, overflowCount);
     lists = {
       ...lists,
-      FAVORITE: lists.FAVORITE,
       HM: [...overflow, ...lists.HM]
     };
   }
@@ -36,7 +35,6 @@ const moveOverflow = (lists) => {
     const overflow = lists.HM.splice(-overflowCount, overflowCount);
     lists = {
       ...lists,
-      HM: lists.HM,
       QUEUE: [...overflow, ...lists.HM]
     };
   }
