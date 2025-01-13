@@ -24,8 +24,6 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-export { MovieListType };
-
 export async function hashPassword(password) {
   const hmac = createHmac('sha256', STATIC_SECRET);
   hmac.update(password);
