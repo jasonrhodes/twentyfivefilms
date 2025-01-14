@@ -17,10 +17,12 @@ export function AlertBox({ alert: { message, style }, visible }) {
 
   return (
     <div
-      className={`border-2 p-2 fixed h-[50px] top-[-50px] z-10 ${styleClass}`}
+      className={`fixed h-[100px] top-[-100px] z-10 px-2`}
       style={transitionStyle}
     >
-      {message}
+      <div className={`${styleClass} h-auto border-2 p-2`}>
+        {message}
+      </div>
     </div>
   );
 }

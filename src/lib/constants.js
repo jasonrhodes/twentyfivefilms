@@ -17,6 +17,7 @@ export const LIST_CONFIG = {
     limit: 15
   },
   QUEUE: {
-    label: 'Uncounted'
+    label: 'Overflow',
+    description: "Uncounted movies that don't fit in your Top 10 or Honorable Mentions. Drag them up if you want to include them"
   }
 }

@@ -1,5 +1,6 @@
 import { arrayMove } from '@dnd-kit/sortable';
 import { LIST_CONFIG } from '@/lib/constants';
+import { MovieListType } from '@prisma/client';
 
 const findList = (lists, id) => {
   if (id in lists) {
@@ -21,22 +22,32 @@ export const debounceDragOver = (func, wait = 10) => {
 };
 
 const moveOverflow = (lists) => {
-  const overFlowingListType = Object.keys(LIST_CONFIG)
-    .find((listType) => LIST_CONFIG[listType].limit && lists[listType].length > LIST_CONFIG[listType].limit);
+  let overflowMessages = [];
 
-  if (overFlowingListType) {
-    let overflowingList = lists[overFlowingListType]
-    const overflowCount = lists[overFlowingListType].length - LIST_CONFIG[overFlowingListType].limit
-    const overflow = overflowingList.splice(-overflowCount, overflowCount)
+  const overflowMessage = (title, fromList, toList) => `${title} overflowed from ${LIST_CONFIG[fromList].label} to ${LIST_CONFIG[toList].label}.`;
 
-    return {
+
+  if (lists.FAVORITE.length > LIST_CONFIG.FAVORITE.limit) {
+    const overflowCount = lists.FAVORITE.length - LIST_CONFIG.FAVORITE.limit;
+    const overflow = lists.FAVORITE.splice(-overflowCount, overflowCount);
+    overflowMessages.push(...(overflow.map((movie) => overflowMessage(movie.title, MovieListType.FAVORITE, MovieListType.HM))))
+    lists = {
       ...lists,
-      [overFlowingListType]: overflowingList,
+      HM: [...overflow, ...lists.HM]
+    };
+  }
+
+  if (lists.HM.length > LIST_CONFIG.HM.limit) {
+    const overflowCount = lists.HM.length - LIST_CONFIG.HM.limit;
+    const overflow = lists.HM.splice(-overflowCount, overflowCount);
+    overflowMessages.push(...(overflow.map((movie) => overflowMessage(movie.title, MovieListType.HM, MovieListType.QUEUE))))
+    lists = {
+      ...lists,
       QUEUE: [...overflow, ...lists.QUEUE]
     };
-  } else {
-    return lists;
   }
+
+  return {lists, overflowMessages};
 }
 
 export const handleDragStart = ({event, setActiveId, lists, setActiveList}) => {
@@ -87,7 +98,7 @@ export const handleDragOver = ({event, lists, setLists, setActiveDropzone}) => {
   setLists(newLists);
 }
 
-export const handleDragEnd = ({event, lists, setLists, setActiveId, setActiveDropzone, setActiveList, saveListsToDb}) => {
+export const handleDragEnd = ({event, lists, setLists, setActiveId, setActiveDropzone, setActiveList, saveListsToDb, resetAlert}) => {
   const { active: {id: activeId}, over: {id: overId} } = event;
   const activeList = findList(lists, activeId);
   const overList = findList(lists, overId);
@@ -100,9 +111,17 @@ export const handleDragEnd = ({event, lists, setLists, setActiveId, setActiveDro
     }
   : lists
 
-  const cleanedLists = moveOverflow(newLists);
+  const {lists: cleanedLists, overflowMessages} = moveOverflow(newLists);
   setLists(cleanedLists);
   saveListsToDb(cleanedLists);
+
+  if (overflowMessages.length) {
+    console.log(overflowMessages)
+    resetAlert({
+      style: 'warning',
+      message: overflowMessages.join(' ')
+    });
+  }
 
   setActiveDropzone(null);
   setActiveList(null);

@@ -16,6 +16,7 @@ import { ListMovieItem } from './MovieItem';
 import { LIST_CONFIG } from '@/lib/constants';
 import { SortableMovieList } from '@/app/my25/[username]/components/SortableMovieList';
 import { MovieListType } from '@prisma/client';
+
 import {
   debounceDragOver,
   handleDragEnd,
@@ -41,7 +42,9 @@ export function MovieLists({
   onMovieRemove,
   imageConfig,
   importMovieBox,
-  saveListsToDb
+  saveListsToDb,
+  onClearList,
+  resetAlert
 }) {
   const [activeId, setActiveId] = useState(null);
   const activeMovie = Object.values(lists)
@@ -108,7 +111,8 @@ export function MovieLists({
               setActiveId,
               setActiveDropzone,
               setActiveList,
-              saveListsToDb
+              saveListsToDb,
+              resetAlert
             })
           }
           onDragStart={(event) =>
@@ -126,6 +130,7 @@ export function MovieLists({
               movies={lists.FAVORITE}
               onRemoveButton={onRemoveButton}
               onAddButton={onAddButton}
+              onClearList={onClearList}
               activeId={activeId}
               imageConfig={imageConfig}
               isActiveDropzone={activeDropZone === MovieListType.FAVORITE}
@@ -133,13 +138,14 @@ export function MovieLists({
                 activeList === MovieListType.FAVORITE &&
                 !lists.FAVORITE.some((movie) => movie.id === activeId)
               }
-              listBoxClass="flex-1 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 flex flex-col"
+              listBoxClass="flex-1 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed"
             />
             <SortableMovieList
               listType={MovieListType.HM}
               movies={lists.HM}
               onRemoveButton={onRemoveButton}
               onAddButton={onAddButton}
+              onClearList={onClearList}
               activeId={activeId}
               imageConfig={imageConfig}
               isActiveDropzone={activeDropZone === MovieListType.HM}
@@ -147,7 +153,7 @@ export function MovieLists({
                 activeList === MovieListType.HM &&
                 !lists.HM.some((movie) => movie.id === activeId)
               }
-              listBoxClass="flex-1 border-2 border-gray-400 border-dashed p-3 flex flex-col"
+              listBoxClass="flex-1 border-2 border-gray-400 border-dashed"
             />
           </div>
           <SortableMovieList
