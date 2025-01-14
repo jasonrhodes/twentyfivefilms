@@ -13,7 +13,7 @@ export function AlertBox({ alert: { message, style }, visible }) {
           : 'bg-white border-gray-500 dark:bg-black';
   const transitionStyle = visible
     ? { transition: 'top 0.5s ease 0s', top: '-2px' }
-    : { transition: 'top 1s ease 3s' };
+    : { transition: 'top 1s ease 5s' };
 
   return (
     <div

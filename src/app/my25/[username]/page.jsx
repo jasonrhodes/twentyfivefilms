@@ -41,7 +41,7 @@ export default function SubmitFilms({ params }) {
     (newAlert) => {
       setAlert(newAlert);
       setAlertVisible(true);
-      window.setTimeout(() => setAlertVisible(false), 2000);
+      window.setTimeout(() => setAlertVisible(false), 1000);
     },
     [setAlert, setAlertVisible]
   );
