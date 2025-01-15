@@ -116,7 +116,6 @@ export const handleDragEnd = ({event, lists, setLists, setActiveId, setActiveDro
   saveListsToDb(cleanedLists);
 
   if (overflowMessages.length) {
-    console.log(overflowMessages)
     resetAlert({
       style: 'warning',
       message: overflowMessages.join(' ')
