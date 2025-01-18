@@ -33,15 +33,24 @@ model User {
 }
 
 model ListEntry {
-  movie      Movie    @relation(fields: [movie_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  movie_id   Int
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id    Int
-  type       MovieListType
-  order      Int
+  movie        Movie    @relation(fields: [movie_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  movie_id     Int
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id      Int
+  type         MovieListType
+  order        Int
+  ranking      Ranking?  @relation(fields: [ranking_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ranking_id   Int?
 
   @@id(name: "list_entry_id", fields: [movie_id, user_id])
   @@unique([user_id, type, order])
+}
+
+model Ranking {
+  id            Int         @id @default(autoincrement())
+  slug          String
+  name          String
+  list_entries  ListEntry[]
 }
 
 model Token {
