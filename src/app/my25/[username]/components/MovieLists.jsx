@@ -160,6 +160,7 @@ export function MovieLists({
             listType={MovieListType.QUEUE}
             movies={lists.QUEUE}
             onRemoveButton={onRemoveButton}
+            onClearList={onClearList}
             activeId={activeId}
             imageConfig={imageConfig}
             isActiveDropzone={activeDropZone === MovieListType.QUEUE}
