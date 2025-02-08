@@ -4,12 +4,12 @@ export const INITIAL_LISTS = {
   FAVORITE: [],
   HM: [],
   QUEUE: []
-}
+};
 export const LIST_CONFIG = {
   FAVORITE: {
     label: 'Top 10',
     description: 'Unranked, equally weighted',
-    limit: 10,
+    limit: 10
   },
   HM: {
     label: '15 Honorable Mentions',
@@ -18,6 +18,7 @@ export const LIST_CONFIG = {
   },
   QUEUE: {
     label: 'Overflow',
-    description: "Uncounted movies that don't fit in your Top 10 or Honorable Mentions. Drag them up if you want to include them"
+    description:
+      "Uncounted movies that don't fit in your Top 10 or Honorable Mentions. Drag them up if you want to include them"
   }
-}
+};

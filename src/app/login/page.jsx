@@ -39,7 +39,7 @@ export default function LoginPage() {
       if (loggedInUser.error === 'LoginError') {
         setErrorMessage(loggedInUser.message);
       } else {
-        router.push(`/my25/${username}`);
+        router.push(`/rankings/${username}`);
       }
     },
     [router, username, password]

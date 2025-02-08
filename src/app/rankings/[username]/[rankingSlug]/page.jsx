@@ -9,11 +9,16 @@ import { ImportMovies } from './components/ImportMovies';
 import { INITIAL_LISTS, LIST_CONFIG } from '@/lib/constants';
 import { getSession } from '@/lib/session';
 import Link from 'next/link';
-import { getLists, saveLists } from '@/lib/db';
+import {
+  getListsForUserRanking,
+  saveLists,
+  getRankingDetailsFromSlug
+} from '@/lib/db';
 
-export default function SubmitFilms({ params }) {
+export default function MyRanking({ params }) {
   const [activeSession, setActiveSession] = useState(null);
   const [lists, setLists] = useState(INITIAL_LISTS);
+  const [ranking, setRanking] = useState(null);
   const [listForModal, setListForModal] = useState(null);
   const [imageConfig, setImageConfig] = useState(null);
   const [alert, setAlert] = useState({});
@@ -26,16 +31,22 @@ export default function SubmitFilms({ params }) {
         const session = await getSession();
         if (session && session?.user?.username === p.username) {
           setActiveSession(session);
-          const storedLists = await getLists({ user_id: session.user.id });
+          const storedLists = await getListsForUserRanking({
+            user_id: session.user.id,
+            ranking_slug: p.rankingSlug
+          });
           setLists(storedLists);
         }
       }
+      const rankingDetails = await getRankingDetailsFromSlug(p.rankingSlug);
+      setRanking(rankingDetails);
+
       const config = await getTmdbConfig();
       setImageConfig(config.images);
     }
 
     retrieve();
-  }, [setImageConfig, activeSession, setActiveSession, setLists]);
+  }, [params, setImageConfig, activeSession, setActiveSession, setLists]);
 
   const resetAlert = useCallback(
     (newAlert) => {
@@ -47,12 +58,16 @@ export default function SubmitFilms({ params }) {
   );
 
   const saveListsToDb = (newLists) => {
-    const listsForDb = Object.entries(newLists).map(([type, movies]) => ({type, movies}));
+    const listsForDb = Object.entries(newLists).map(([type, movies]) => ({
+      type,
+      movies
+    }));
     saveLists({
       user_id: activeSession.user.id,
+      ranking_slug: ranking.slug,
       lists: listsForDb
     });
-  }
+  };
 
   const onMovieSelect = useCallback(
     (movie) => {
@@ -60,20 +75,25 @@ export default function SubmitFilms({ params }) {
         return;
       }
 
-      if (lists[listForModal].some(lm => lm.id === movie.id)) {
+      if (lists[listForModal].some((lm) => lm.id === movie.id)) {
         resetAlert({
           style: 'warning',
           message: `${movie.title} is already on ${LIST_CONFIG[listForModal].label}`
         });
       } else {
-        const newLists = Object.keys(INITIAL_LISTS).reduce((result, listType) => {
-          if (listType === listForModal) {
-            result[listType] = [...lists[listType], movie];
-          } else {
-            result[listType] = lists[listType].filter(lm => lm.id !== movie.id);
-          }
-          return result;
-        }, INITIAL_LISTS)
+        const newLists = Object.keys(INITIAL_LISTS).reduce(
+          (result, listType) => {
+            if (listType === listForModal) {
+              result[listType] = [...lists[listType], movie];
+            } else {
+              result[listType] = lists[listType].filter(
+                (lm) => lm.id !== movie.id
+              );
+            }
+            return result;
+          },
+          INITIAL_LISTS
+        );
         setLists(newLists);
         saveListsToDb(newLists);
 
@@ -94,7 +114,7 @@ export default function SubmitFilms({ params }) {
         return !existingMovies.some((movie) => movie.id === importedMovie.id);
       });
       const numAdded = newMovies.length;
-      const newLists = {...lists};
+      const newLists = { ...lists };
 
       if (lists.FAVORITE.length || lists.HM.length) {
         newLists.QUEUE = [...newLists.QUEUE, ...newMovies];
@@ -131,7 +151,7 @@ export default function SubmitFilms({ params }) {
 
   const onMovieRemove = useCallback(
     (movie, listType) => {
-      let newLists = {...lists};
+      let newLists = { ...lists };
       newLists[listType] = lists[listType].filter((f) => f.id !== movie.id);
       setLists(newLists);
       saveListsToDb(newLists);
@@ -172,12 +192,23 @@ export default function SubmitFilms({ params }) {
   }
 
   if (!imageConfig) {
-    return null
+    return null;
   }
 
   return (
-    <>
+    <div>
       <AlertBox alert={alert} visible={alertVisible} />
+      <section className="text-center">
+        <p>
+          <Link href={`/rankings/${activeSession.user.username}`}>
+            &laquo; All my rankings
+          </Link>
+        </p>
+      </section>
+      <section className="text-center">
+        <h1>{ranking ? ranking.name : 'Loading...'}</h1>
+      </section>
+
       {!!listForModal ? (
         <ChooseMovieModal
           onSelect={onMovieSelect}
@@ -203,6 +234,6 @@ export default function SubmitFilms({ params }) {
           }
         />
       )}
-    </>
+    </div>
   );
 }

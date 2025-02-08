@@ -162,6 +162,18 @@ export async function getAuthTokenRecord({ token }) {
   });
 }
 
+export async function getRankingsForUser({ user_id }) {
+  return await prisma.ranking.findMany();
+}
+
+export async function getRankingDetailsFromSlug(slug) {
+  return await prisma.ranking.findFirst({
+    where: {
+      slug
+    }
+  });
+}
+
 function sortMoviesIntoLists(movies) {
   const init = {
     FAVORITE: [],
@@ -179,11 +191,14 @@ function sortMoviesIntoLists(movies) {
   }, init);
 }
 
-export async function getLists({ user_id }) {
-  logger.debug(`Attempting to get lists for user ${user_id}`);
+export async function getListsForUserRanking({ user_id, ranking_slug }) {
+  logger.debug(
+    `Attempting to get lists for user ${user_id} for ranking ${ranking_slug} `
+  );
   const movies = await prisma.listEntry.findMany({
     where: {
-      user_id
+      user_id,
+      ranking_slug
     },
     orderBy: [
       {
@@ -201,7 +216,7 @@ export async function getLists({ user_id }) {
 }
 
 // lists should be an array of { type, movies }
-export async function saveLists({ user_id, lists }) {
+export async function saveLists({ user_id, ranking_slug, lists }) {
   const types = lists.map((list) => list.type);
 
   // wishing I had TypeScript right now
@@ -237,6 +252,7 @@ export async function saveLists({ user_id, lists }) {
       prisma.listEntry.deleteMany({
         where: {
           user_id,
+          ranking_slug,
           type: {
             in: types
           }
@@ -248,6 +264,7 @@ export async function saveLists({ user_id, lists }) {
           return movies.map((m) => ({
             movie_id: m.id,
             user_id,
+            ranking_slug,
             type,
             order: counters[type]++
           }));
