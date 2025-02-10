@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
 import { MovieLists } from './components/MovieLists';
@@ -24,6 +25,8 @@ export default function MyRanking({ params }) {
   const [alert, setAlert] = useState({});
   const [alertVisible, setAlertVisible] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     async function retrieve() {
       const p = await params;
@@ -37,16 +40,34 @@ export default function MyRanking({ params }) {
           });
           setLists(storedLists);
         }
+      } else {
+        const rankingDetails = await getRankingDetailsFromSlug(p.rankingSlug);
+        if (!rankingDetails || !rankingDetails.slug) {
+          // not a valid ranking slug
+          router.replace(`/rankings/${activeSession.user.username}`);
+        }
+        setRanking(rankingDetails);
       }
-      const rankingDetails = await getRankingDetailsFromSlug(p.rankingSlug);
-      setRanking(rankingDetails);
+    }
 
+    retrieve();
+  }, [
+    params,
+    router,
+    setImageConfig,
+    activeSession,
+    setActiveSession,
+    setLists
+  ]);
+
+  useEffect(() => {
+    async function retrieveTmdbConfig() {
       const config = await getTmdbConfig();
       setImageConfig(config.images);
     }
 
-    retrieve();
-  }, [params, setImageConfig, activeSession, setActiveSession, setLists]);
+    retrieveTmdbConfig();
+  }, [getTmdbConfig, setImageConfig]);
 
   const resetAlert = useCallback(
     (newAlert) => {
@@ -182,12 +203,12 @@ export default function MyRanking({ params }) {
 
   if (!activeSession) {
     return (
-      <p>
-        You need to be logged in as this user to view this page.{' '}
-        <Link className="font-bold underline" href="/login">
-          Login →
-        </Link>
-      </p>
+      <div className="text-center">
+        <p>You need to be logged in as this user to view this page.</p>
+        <p>
+          At this time, you can only login by typing /my25 in a valid Slack.
+        </p>
+      </div>
     );
   }
 

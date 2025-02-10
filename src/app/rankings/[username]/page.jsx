@@ -24,7 +24,6 @@ export default function MyRankings({ params }) {
         const userRankings = await getRankingsForUser({
           user_id: activeSession.user.id
         });
-        console.log('retrieved rankings woot', userRankings);
         setRankings(userRankings);
       }
     }
