@@ -39,6 +39,8 @@ export default function MyRanking({ params }) {
             ranking_slug: p.rankingSlug
           });
           setLists(storedLists);
+        } else {
+          router.replace(`/login`);
         }
       } else {
         const rankingDetails = await getRankingDetailsFromSlug(p.rankingSlug);
@@ -78,17 +80,20 @@ export default function MyRanking({ params }) {
     [setAlert, setAlertVisible]
   );
 
-  const saveListsToDb = (newLists) => {
-    const listsForDb = Object.entries(newLists).map(([type, movies]) => ({
-      type,
-      movies
-    }));
-    saveLists({
-      user_id: activeSession.user.id,
-      ranking_slug: ranking.slug,
-      lists: listsForDb
-    });
-  };
+  const saveListsToDb = useCallback(
+    (newLists) => {
+      const listsForDb = Object.entries(newLists).map(([type, movies]) => ({
+        type,
+        movies
+      }));
+      saveLists({
+        user_id: activeSession.user.id,
+        ranking_slug: ranking.slug,
+        lists: listsForDb
+      });
+    },
+    [activeSession, ranking, saveLists]
+  );
 
   const onMovieSelect = useCallback(
     (movie) => {
@@ -125,7 +130,7 @@ export default function MyRanking({ params }) {
         setListForModal(null);
       }
     },
-    [lists, setLists, setListForModal, listForModal]
+    [lists, saveListsToDb, setLists, setListForModal, listForModal]
   );
 
   const onImportSuccess = useCallback(
@@ -160,7 +165,7 @@ export default function MyRanking({ params }) {
         message: message
       });
     },
-    [lists, setLists]
+    [lists, setLists, saveListsToDb]
   );
 
   const onImportFailure = useCallback((importFailureMessage) => {
@@ -181,7 +186,7 @@ export default function MyRanking({ params }) {
         message: `${movie.title} removed from ${LIST_CONFIG[listType].label}`
       });
     },
-    [lists, setLists]
+    [lists, setLists, saveListsToDb]
   );
 
   const onClearList = useCallback(
@@ -198,22 +203,15 @@ export default function MyRanking({ params }) {
         message: `${deletedCount} movies removed from ${LIST_CONFIG[listType].label}`
       });
     },
-    [lists, setLists]
+    [lists, setLists, saveListsToDb]
   );
 
-  if (!activeSession) {
+  if (!activeSession || !ranking || !lists || !imageConfig) {
     return (
       <div className="text-center">
-        <p>You need to be logged in as this user to view this page.</p>
-        <p>
-          At this time, you can only login by typing /my25 in a valid Slack.
-        </p>
+        <p>Loading...</p>
       </div>
     );
-  }
-
-  if (!imageConfig) {
-    return null;
   }
 
   return (
