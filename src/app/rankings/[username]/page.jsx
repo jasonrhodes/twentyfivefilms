@@ -41,7 +41,7 @@ export default function MyRankings({ params }) {
       <section className="mb-3">
         <h1>Your Rankings</h1>
         <p className="text-sm">
-          You're logged in as <b>{username}</b>
+          You are logged in as <b>{username}</b>
         </p>
       </section>
       <ul>

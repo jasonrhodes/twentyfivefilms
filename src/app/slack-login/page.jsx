@@ -37,7 +37,7 @@ function ShowToken() {
       setLoading(false);
     }
     retrieve();
-  }, [authToken]);
+  }, [authToken, router]);
 
   if (!authToken) {
     return <p>No auth token provided</p>;
