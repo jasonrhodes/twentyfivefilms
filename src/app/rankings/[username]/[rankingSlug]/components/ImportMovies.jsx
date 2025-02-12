@@ -3,8 +3,14 @@
 import React, { useState } from 'react';
 import { importMovieList } from '@/lib/importMovieList';
 import { INVALID_URL_ERROR } from '@/lib/constants';
+import { IconSquareXFilled } from '@tabler/icons-react';
 
-export function ImportMovies({ onImportSuccess, onImportFailure, importVisible }) {
+export function ImportMovies({
+  onImportSuccess,
+  onImportFailure,
+  importVisible,
+  setImportVisible
+}) {
   const [inputValue, setInputValue] = useState('');
 
   const handleImport = async () => {
@@ -32,6 +38,10 @@ export function ImportMovies({ onImportSuccess, onImportFailure, importVisible }
   return (
     <div className="flex flex-col items-center m-2">
       <div className="flex flex-row items-center">
+        <IconSquareXFilled
+          className="cursor-pointer mr-1"
+          onClick={() => setImportVisible(false)}
+        />
         <input
           type="text"
           value={inputValue}
@@ -41,8 +51,7 @@ export function ImportMovies({ onImportSuccess, onImportFailure, importVisible }
         />
         <button
           onClick={handleImport}
-          className="p-2 m-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-300"
-        >
+          className="p-2 m-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-300">
           Import
         </button>
       </div>

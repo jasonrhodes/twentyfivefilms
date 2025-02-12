@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { buildImageUrl } from '@/lib/buildImageUrl';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
-import Image from 'next/image';
 
 function MovieItem({ movie, imageConfig }) {
   const imageUrl = useMemo(
