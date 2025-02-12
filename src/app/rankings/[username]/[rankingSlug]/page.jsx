@@ -223,7 +223,10 @@ export default function MyRanking({ params }) {
 
   return (
     <div className="w-full sm:w-auto pt-[50px]">
-      <MenuBar username={activeSession.user.username} onImportClick={() => setImportVisible(!importVisible)}/>
+      <MenuBar
+        username={activeSession.user.username}
+        onImportClick={() => setImportVisible(!importVisible)}
+      />
       <AlertBox alert={alert} visible={alertVisible} />
       <section className="text-center">
         <h1>{ranking ? ranking.name : 'Loading...'}</h1>
@@ -251,6 +254,7 @@ export default function MyRanking({ params }) {
               onImportSuccess={onImportSuccess}
               onImportFailure={onImportFailure}
               importVisible={importVisible}
+              setImportVisible={setImportVisible}
             />
           }
         />
