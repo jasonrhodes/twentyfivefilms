@@ -15,6 +15,7 @@ import {
   saveLists,
   getRankingDetailsFromSlug
 } from '@/lib/db';
+import { MenuBar } from '@/app/rankings/[username]/[rankingSlug]/components/MenuBar';
 
 export default function MyRanking({ params }) {
   const [activeSession, setActiveSession] = useState(null);
@@ -24,6 +25,7 @@ export default function MyRanking({ params }) {
   const [imageConfig, setImageConfig] = useState(null);
   const [alert, setAlert] = useState({});
   const [alertVisible, setAlertVisible] = useState(false);
+  const [importVisible, setImportVisible] = useState(false);
 
   const router = useRouter();
 
@@ -164,6 +166,8 @@ export default function MyRanking({ params }) {
         style: 'success',
         message: message
       });
+
+      setImportVisible(false);
     },
     [lists, setLists, saveListsToDb, resetAlert]
   );
@@ -218,15 +222,9 @@ export default function MyRanking({ params }) {
   }
 
   return (
-    <div>
+    <div className="w-full sm:w-auto pt-[50px]">
+      <MenuBar username={activeSession.user.username} onImportClick={() => setImportVisible(!importVisible)}/>
       <AlertBox alert={alert} visible={alertVisible} />
-      <section className="text-center">
-        <p>
-          <Link href={`/rankings/${activeSession.user.username}`}>
-            &laquo; All my rankings
-          </Link>
-        </p>
-      </section>
       <section className="text-center">
         <h1>{ranking ? ranking.name : 'Loading...'}</h1>
       </section>
@@ -252,6 +250,7 @@ export default function MyRanking({ params }) {
             <ImportMovies
               onImportSuccess={onImportSuccess}
               onImportFailure={onImportFailure}
+              importVisible={importVisible}
             />
           }
         />

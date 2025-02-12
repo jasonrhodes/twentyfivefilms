@@ -25,7 +25,7 @@ import {
 } from '@/lib/dragAndDrop';
 import { keyCodeListener } from '@/lib/keyCodeListener';
 
-class MyMouserSensor extends MouseSensor {
+class MyMouseSensor extends MouseSensor {
   static activators = [
     {
       eventName: 'onMouseDown',
@@ -34,6 +34,17 @@ class MyMouserSensor extends MouseSensor {
     }
   ];
 }
+
+class MyTouchSensor extends TouchSensor {
+  static activators = [
+    {
+      eventName: 'onTouchStart',
+      handler: ({ nativeEvent }) =>
+        !nativeEvent.target.classList.contains('deleteButton')
+    }
+  ];
+}
+
 
 export function MovieLists({
   lists,
@@ -54,11 +65,11 @@ export function MovieLists({
   const [activeDropZone, setActiveDropzone] = useState(null);
 
   const sensors = useSensors(
-    useSensor(MyMouserSensor),
+    useSensor(MyMouseSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates
     }),
-    useSensor(TouchSensor, {
+    useSensor(MyTouchSensor, {
       activationConstraint: {
         delay: 100,
         tolerance: 8
@@ -165,7 +176,7 @@ export function MovieLists({
               activeList === MovieListType.QUEUE &&
               !lists.QUEUE.some((movie) => movie.id === activeId)
             }
-            listBoxClass="opacity-50 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 my-2 flex flex-col"
+            listBoxClass="opacity-80 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 border-dashed p-3 my-2 flex flex-col"
             movieContainerClass="flex flex-wrap flex-row  md:justify-between"
             itemClass="flex-1 md:basis-[calc(50%-20px)] md:flex-initial"
           />
