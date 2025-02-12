@@ -13,11 +13,11 @@ export function AlertBox({ alert: { message, style }, visible }) {
           : 'bg-white border-gray-500 dark:bg-black';
   const transitionStyle = visible
     ? { transition: 'top 0.5s ease 0s', top: '-2px' }
-    : { transition: 'top 1s ease 5s' };
+    : { transition: 'top 1s ease 4s' };
 
   return (
     <div
-      className={`fixed h-[100px] top-[-100px] z-10 px-2`}
+      className={`fixed h-[100px] top-[-100px] left-0 w-full text-center z-20 px-2`}
       style={transitionStyle}
     >
       <div className={`${styleClass} h-auto border-2 p-2`}>
