@@ -12,7 +12,7 @@ export function MenuBar({username, onImportClick}) {
   return (
     <div className={`fixed h-[50px] w-full top-0 left-0 z-10 bg-gray-900 flex items-center justify-center`}>
       <div className={`w-full h-full lg:w-[960px]`}>
-        <div className={`flex sm:hidden w-[50px] p-3 border-l-2 border-r-2 border-gray-800 ${hamburgerOpen ? 'bg-gray-800' : ''}`}
+        <div className={`flex text-gray-200 sm:hidden w-[50px] p-3 border-l-2 border-r-2 border-gray-800 ${hamburgerOpen ? 'bg-gray-800' : ''}`}
              onClick={() => setHamburgerOpen(!hamburgerOpen)}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
