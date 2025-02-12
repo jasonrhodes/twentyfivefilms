@@ -25,7 +25,7 @@ function MovieItem({ movie, imageConfig }) {
         className="no-user-select h-24 bg-gray-200 dark:bg-gray-800 flex justify-center align-middle items-center"
         style={{ flex: '0 0 4rem' }}>
         {imageUrl ? (
-          <Image
+          <img
             alt={movie.title + ' Poster'}
             width={92}
             height={138}
