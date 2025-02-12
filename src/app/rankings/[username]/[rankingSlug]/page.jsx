@@ -69,7 +69,7 @@ export default function MyRanking({ params }) {
     }
 
     retrieveTmdbConfig();
-  }, [getTmdbConfig, setImageConfig]);
+  }, [setImageConfig]);
 
   const resetAlert = useCallback(
     (newAlert) => {
@@ -92,7 +92,7 @@ export default function MyRanking({ params }) {
         lists: listsForDb
       });
     },
-    [activeSession, ranking, saveLists]
+    [activeSession, ranking]
   );
 
   const onMovieSelect = useCallback(
@@ -130,7 +130,7 @@ export default function MyRanking({ params }) {
         setListForModal(null);
       }
     },
-    [lists, saveListsToDb, setLists, setListForModal, listForModal]
+    [lists, saveListsToDb, setLists, setListForModal, listForModal, resetAlert]
   );
 
   const onImportSuccess = useCallback(
@@ -165,15 +165,18 @@ export default function MyRanking({ params }) {
         message: message
       });
     },
-    [lists, setLists, saveListsToDb]
+    [lists, setLists, saveListsToDb, resetAlert]
   );
 
-  const onImportFailure = useCallback((importFailureMessage) => {
-    resetAlert({
-      style: 'warning',
-      message: importFailureMessage
-    });
-  });
+  const onImportFailure = useCallback(
+    (importFailureMessage) => {
+      resetAlert({
+        style: 'warning',
+        message: importFailureMessage
+      });
+    },
+    [resetAlert]
+  );
 
   const onMovieRemove = useCallback(
     (movie, listType) => {
@@ -186,7 +189,7 @@ export default function MyRanking({ params }) {
         message: `${movie.title} removed from ${LIST_CONFIG[listType].label}`
       });
     },
-    [lists, setLists, saveListsToDb]
+    [lists, setLists, saveListsToDb, resetAlert]
   );
 
   const onClearList = useCallback(
@@ -203,7 +206,7 @@ export default function MyRanking({ params }) {
         message: `${deletedCount} movies removed from ${LIST_CONFIG[listType].label}`
       });
     },
-    [lists, setLists, saveListsToDb]
+    [lists, setLists, saveListsToDb, resetAlert]
   );
 
   if (!activeSession || !ranking || !lists || !imageConfig) {

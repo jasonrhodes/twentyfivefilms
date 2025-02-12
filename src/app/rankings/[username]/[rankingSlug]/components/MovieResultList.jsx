@@ -11,11 +11,14 @@ export function MovieResultList({
   setSelectedIndex,
   disableHoverSelect
 }) {
-  const handleHover = useCallback((e, index) => {
-    if (!disableHoverSelect) {
-      setSelectedIndex(index);
-    }
-  });
+  const handleHover = useCallback(
+    (e, index) => {
+      if (!disableHoverSelect) {
+        setSelectedIndex(index);
+      }
+    },
+    [disableHoverSelect, setSelectedIndex]
+  );
 
   return (
     <div>
@@ -23,8 +26,7 @@ export function MovieResultList({
         {movies.map((movie, i) => (
           <li
             key={`${movie.title}-${movie.id}`}
-            onMouseEnter={(e) => handleHover(e, i)}
-          >
+            onMouseEnter={(e) => handleHover(e, i)}>
             <SearchMovieItem
               movie={movie}
               onSelect={onSelect}

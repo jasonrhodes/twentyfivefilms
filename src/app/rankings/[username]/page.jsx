@@ -30,7 +30,7 @@ export default function MyRankings({ params }) {
     }
 
     retrieve();
-  }, [activeSession, setActiveSession, getSession, setRankings]);
+  }, [activeSession, setActiveSession, setRankings, params]);
 
   if (!activeSession) {
     return 'Logging in...';

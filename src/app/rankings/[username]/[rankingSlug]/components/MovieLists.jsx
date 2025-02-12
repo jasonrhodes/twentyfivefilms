@@ -75,7 +75,7 @@ export function MovieLists({
           setListForModal(MovieListType.HM);
         }
       }),
-    []
+    [lists, setListForModal]
   );
 
   const onAddButton = useCallback(
