@@ -10,7 +10,6 @@ export function ChooseMovieModal({
   initialValue = '',
   onSelect,
   imageConfig,
-  listType,
   closeModal
 }) {
   const [val, setVal] = useState(initialValue);
@@ -28,27 +27,37 @@ export function ChooseMovieModal({
 
   const cancelSearch = useCallback(() => closeModal(), [closeModal]);
 
-  const onKeyDown = useCallback((event) => {
-    if (event.code === 'ArrowUp') {
-      event.preventDefault();
-      setDisableHoverSelect(true);
-      setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1);
-    } else if (event.code === 'ArrowDown') {
-      event.preventDefault();
-      setDisableHoverSelect(true);
-      setSelectedIndex(
-        selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1
-      );
-    } else if (event.code === 'Enter') {
-      event.preventDefault();
-      onSelect(movies[selectedIndex], true);
-    } else if (event.code === 'Escape') {
-      event.preventDefault();
-      cancelSearch();
-    } else {
-      setSelectedIndex(0);
-    }
-  });
+  const onKeyDown = useCallback(
+    (event) => {
+      if (event.code === 'ArrowUp') {
+        event.preventDefault();
+        setDisableHoverSelect(true);
+        setSelectedIndex(selectedIndex === 0 ? 0 : selectedIndex - 1);
+      } else if (event.code === 'ArrowDown') {
+        event.preventDefault();
+        setDisableHoverSelect(true);
+        setSelectedIndex(
+          selectedIndex === movies.length - 1 ? 0 : selectedIndex + 1
+        );
+      } else if (event.code === 'Enter') {
+        event.preventDefault();
+        onSelect(movies[selectedIndex], true);
+      } else if (event.code === 'Escape') {
+        event.preventDefault();
+        cancelSearch();
+      } else {
+        setSelectedIndex(0);
+      }
+    },
+    [
+      setDisableHoverSelect,
+      setSelectedIndex,
+      onSelect,
+      cancelSearch,
+      movies,
+      selectedIndex
+    ]
+  );
 
   useEffect(() => {
     if (ref?.current) {
@@ -56,9 +65,8 @@ export function ChooseMovieModal({
     }
   }, [ref]);
 
-  let useThisResult = true;
-
   useEffect(() => {
+    let useThisResult = true;
     async function doAction() {
       const results = await lookupMovie(val);
       if (useThisResult) {

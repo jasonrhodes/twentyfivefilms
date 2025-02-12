@@ -14,7 +14,7 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { ListMovieItem } from './MovieItem';
 import { LIST_CONFIG } from '@/lib/constants';
-import { SortableMovieList } from '@/app/my25/[username]/components/SortableMovieList';
+import { SortableMovieList } from './SortableMovieList';
 import { MovieListType } from '@prisma/client';
 
 import {
@@ -75,7 +75,7 @@ export function MovieLists({
           setListForModal(MovieListType.HM);
         }
       }),
-    []
+    [lists, setListForModal]
   );
 
   const onAddButton = useCallback(
@@ -94,9 +94,6 @@ export function MovieLists({
 
   return (
     <div className="w-full flex-auto">
-      <section className="text-center">
-        <h1>My Twenty Five</h1>
-      </section>
       <section>
         <div className="py-4 flex justify-center">{importMovieBox}</div>
       </section>

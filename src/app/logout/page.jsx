@@ -13,7 +13,7 @@ export default function LoginPage() {
       router.replace('/');
     }
     logout();
-  }, []);
+  }, [router]);
 
   return <p>Logging out...</p>;
 }

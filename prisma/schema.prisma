@@ -39,18 +39,23 @@ model ListEntry {
   user_id      Int
   type         MovieListType
   order        Int
-  ranking      Ranking?  @relation(fields: [ranking_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  ranking_id   Int?
+  ranking      Ranking  @relation(fields: [ranking_slug], references: [slug], onDelete: Restrict, onUpdate: Cascade)
+  ranking_slug String
 
-  @@id(name: "list_entry_id", fields: [movie_id, user_id])
-  @@unique([user_id, type, order])
+  @@id(name: "list_entry_id", fields: [movie_id, ranking_slug, user_id])
+  @@unique([user_id, ranking_slug, type, order])
 }
 
 model Ranking {
-  id            Int         @id @default(autoincrement())
-  slug          String
-  name          String
-  list_entries  ListEntry[]
+  slug            String      @id
+  name            String      @unique
+  description     String?
+  is_ordered      Boolean
+  favorites_max   Int?        // null for no max, 0 to exclude this type
+  hms_max         Int?        // null for no max, 0 to exclude this type
+  min_year        Int?
+  max_year        Int?
+  list_entries    ListEntry[]
 }
 
 model Token {
