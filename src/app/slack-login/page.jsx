@@ -32,7 +32,7 @@ function ShowToken() {
         setUser(record.user);
         delete record.user.hashedPassword;
         await setSession({ user: record.user });
-        router.push(`/rankings/${record.user.username}`);
+        router.push(`/rankings/${record.user.username}/all-time`);
       }
       setLoading(false);
     }
