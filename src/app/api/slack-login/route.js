@@ -30,7 +30,7 @@ export async function POST(req) {
       try {
         logger.debug('attempting to send a response back to Slack');
 
-        const message = `Congrats! You can now visit 25 Films at the following login link: ${appBaseUrl}/slack-login?authToken=${token.id}`;
+        const message = `Congrats! You can now visit 25 Films at the following login link: ${appBaseUrl}/slack-login?authToken=${token.id} -- don't share this link with anyone else!`;
 
         // use 'stdout' when testing locally if you want the link printed to stdout
         if (responseUrl === 'stdout') {
