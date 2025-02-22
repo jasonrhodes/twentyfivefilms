@@ -1,8 +1,8 @@
 'use client';
 
-import { getSession } from '@/lib/session';
+import { useSession } from '@/components/useSession';
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 function Callout({ checkedForLogin, activeSession }) {
   if (!checkedForLogin) {
@@ -30,20 +30,7 @@ function Callout({ checkedForLogin, activeSession }) {
 }
 
 export default function Home() {
-  const [checkedForLogin, setCheckedForLogin] = useState(false);
-  const [activeSession, setActiveSession] = useState(null);
-
-  useEffect(() => {
-    async function retrieve() {
-      const session = await getSession();
-      if (session) {
-        setActiveSession(session);
-      }
-      setCheckedForLogin(true);
-    }
-
-    retrieve();
-  }, [setActiveSession]);
+  const { sessionReady, session } = useSession();
 
   return (
     <div className="h-[400px] text-2xl flex flex-col justify-between border-red-500">
@@ -51,10 +38,7 @@ export default function Home() {
       <p>10 favorites.</p>
       <p>15 honorable mentions.</p>
       <p>Choose your twenty five.</p>
-      <Callout
-        checkedForLogin={checkedForLogin}
-        activeSession={activeSession}
-      />
+      <Callout checkedForLogin={sessionReady} activeSession={session} />
     </div>
   );
 }

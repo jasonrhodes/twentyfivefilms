@@ -2,14 +2,27 @@
 
 import { Input } from '@/components/Input';
 import { loginUser } from '@/lib/db';
+import { getSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
+
+  // useEffect(() => {
+  //   async function checkLoginStatus() {
+  //     const session = await getSession();
+  //     if (session) {
+  //       router.replace(`/rankings/${session.user.username}`);
+  //     }
+  //   }
+
+  //   checkLoginStatus();
+  // }, [router]);
+
   const onUsernameChange = useCallback(
     (val) => {
       setErrorMessage('');
