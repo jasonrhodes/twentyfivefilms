@@ -59,7 +59,15 @@ export function AuthenticatedPage({ children, asyncParams, type }) {
 
     logger.debug('Verification complete, authentication granted');
     setIsVerifying(false);
-  }, [sessionReady, pathParamsReady, user, session, type, setIsVerifying]);
+  }, [
+    sessionReady,
+    pathParamsReady,
+    user,
+    router,
+    session,
+    type,
+    setIsVerifying
+  ]);
 
   if (isVerifying) {
     return <p>Verifying authentication...</p>;
@@ -70,20 +78,16 @@ export function AuthenticatedPage({ children, asyncParams, type }) {
 
 export function PathAuthenticatedPage({ children, asyncParams }) {
   return (
-    <AuthenticatedPage
-      children={children}
-      type="session-path-match"
-      asyncParams={asyncParams}
-    />
+    <AuthenticatedPage type="session-path-match" asyncParams={asyncParams}>
+      {children}
+    </AuthenticatedPage>
   );
 }
 
 export function AdminAuthenticatedPage({ children, asyncParams }) {
   return (
-    <AuthenticatedPage
-      children={children}
-      type="admin"
-      asyncParams={asyncParams}
-    />
+    <AuthenticatedPage type="admin" asyncParams={asyncParams}>
+      {children}
+    </AuthenticatedPage>
   );
 }
