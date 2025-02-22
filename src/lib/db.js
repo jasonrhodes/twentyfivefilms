@@ -82,6 +82,30 @@ export async function loginUser({ username, password }) {
   return user;
 }
 
+export async function getUserByUsername({ username }) {
+  const user = await prisma.user.findFirst({
+    where: {
+      username
+    }
+  });
+
+  return user;
+}
+
+export async function getUserById({ id }) {
+  const user = await prisma.user.findFirst({
+    where: {
+      id
+    }
+  });
+
+  return user;
+}
+
+export async function getAllUsers({ orderBy = [] }) {
+  return await prisma.user.findMany({ orderBy });
+}
+
 function makePassword(length) {
   let result = '';
   const characters =

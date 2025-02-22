@@ -17,8 +17,8 @@ async function log(...messages) {
 }
 
 export async function debug(...messages) {
-  if (process.env.DEBUG_LOGS) {
-    log(...messages);
+  if (process.env.NEXT_PUBLIC_DEBUG_LOGS) {
+    log('[DEBUG]', ...messages);
   }
 }
 

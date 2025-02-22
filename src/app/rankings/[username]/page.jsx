@@ -1,39 +1,49 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { getSession } from '@/lib/session';
+import React, { useState, useEffect } from 'react';
 import { getRankingsForUser } from '@/lib/db';
 import Link from 'next/link';
 import { IconStarFilled } from '@tabler/icons-react';
+import { PathAuthenticatedPage } from '@/components/AuthenticatedPage';
+import * as logger from '@/lib/logger';
 
-export default function MyRankings({ params }) {
-  const [username, setUsername] = useState(null);
-  const [activeSession, setActiveSession] = useState(null);
+export default function AuthMyRankings({ params: asyncParams }) {
+  return (
+    <PathAuthenticatedPage asyncParams={asyncParams}>
+      {({ params, user, session, router }) => (
+        <MyRankings
+          params={params}
+          user={user}
+          session={session}
+          router={router}
+        />
+      )}
+    </PathAuthenticatedPage>
+  );
+}
+
+function MyRankings({ user, session }) {
   const [rankings, setRankings] = useState([]);
 
   useEffect(() => {
     async function retrieve() {
-      const p = await params;
-      if (!activeSession) {
-        const session = await getSession();
-        if (session && session?.user?.username === p.username) {
-          setUsername(p.username);
-          setActiveSession(session);
-        }
-      }
-      if (activeSession) {
+      logger.debug(
+        'Checking for user before retrieving rankings for user',
+        user
+      );
+      if (user) {
         const userRankings = await getRankingsForUser({
-          user_id: activeSession.user.id
+          user_id: user.id
         });
         setRankings(userRankings);
       }
     }
 
     retrieve();
-  }, [activeSession, setActiveSession, setRankings, params]);
+  }, [user, setRankings]);
 
-  if (!activeSession) {
-    return 'Logging in...';
+  if (!user) {
+    return 'Loading...';
   }
 
   return (
@@ -41,15 +51,20 @@ export default function MyRankings({ params }) {
       <section className="mb-3">
         <h1>Your Rankings</h1>
         <p className="text-sm">
-          You are logged in as <b>{username}</b>
+          You are logged in as <b>{session.user.username}</b>
         </p>
+        {user.username !== session.user.username ? (
+          <p className="text-sm">Viewing rankings for {user.username}</p>
+        ) : null}
       </section>
       <ul>
         {rankings.map((r) => (
           <li key={r.slug} className="mb-3">
             <RankingListItemWrapper slug={r.slug}>
               <strong className="text-lg">
-                <Link href={`/rankings/${username}/${r.slug}`}>{r.name}</Link>
+                <Link href={`/rankings/${user.username}/${r.slug}`}>
+                  {r.name}
+                </Link>
               </strong>
               <br />
               <p>{r.description}</p>

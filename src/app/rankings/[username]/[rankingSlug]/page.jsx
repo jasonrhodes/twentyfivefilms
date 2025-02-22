@@ -1,24 +1,36 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
 import { MovieLists } from './components/MovieLists';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
 import { ImportMovies } from './components/ImportMovies';
 import { INITIAL_LISTS, LIST_CONFIG } from '@/lib/constants';
-import { getSession } from '@/lib/session';
-import Link from 'next/link';
 import {
   getListsForUserRanking,
   saveLists,
   getRankingDetailsFromSlug
 } from '@/lib/db';
 import { MenuBar } from '@/app/rankings/[username]/[rankingSlug]/components/MenuBar';
+import { PathAuthenticatedPage } from '@/components/AuthenticatedPage';
 
-export default function MyRanking({ params }) {
-  const [activeSession, setActiveSession] = useState(null);
+export default function AuthRankingPage({ params: asyncParams }) {
+  return (
+    <PathAuthenticatedPage asyncParams={asyncParams}>
+      {({ params, user, session, router }) => (
+        <RankingPage
+          params={params}
+          user={user}
+          session={session}
+          router={router}
+        />
+      )}
+    </PathAuthenticatedPage>
+  );
+}
+
+function RankingPage({ params, user, session, router }) {
   const [lists, setLists] = useState(INITIAL_LISTS);
   const [ranking, setRanking] = useState(null);
   const [listForModal, setListForModal] = useState(null);
@@ -27,42 +39,30 @@ export default function MyRanking({ params }) {
   const [alertVisible, setAlertVisible] = useState(false);
   const [importVisible, setImportVisible] = useState(false);
 
-  const router = useRouter();
-
   useEffect(() => {
     async function retrieve() {
-      const p = await params;
-      if (!activeSession) {
-        const session = await getSession();
-        if (session && session?.user?.username === p.username) {
-          setActiveSession(session);
-          const storedLists = await getListsForUserRanking({
-            user_id: session.user.id,
-            ranking_slug: p.rankingSlug
-          });
-          setLists(storedLists);
-        } else {
-          router.replace(`/login`);
-        }
-      } else {
-        const rankingDetails = await getRankingDetailsFromSlug(p.rankingSlug);
-        if (!rankingDetails || !rankingDetails.slug) {
-          // not a valid ranking slug
-          router.replace(`/rankings/${activeSession.user.username}`);
-        }
-        setRanking(rankingDetails);
+      if (!session || !user || !params) {
+        return;
       }
+
+      const rankingDetails = await getRankingDetailsFromSlug(
+        params.rankingSlug
+      );
+      if (!rankingDetails || !rankingDetails.slug) {
+        // not a valid ranking slug
+        router.replace(`/rankings/${user.username}`);
+      }
+      setRanking(rankingDetails);
+
+      const storedLists = await getListsForUserRanking({
+        user_id: user.id,
+        ranking_slug: params.rankingSlug
+      });
+      setLists(storedLists);
     }
 
     retrieve();
-  }, [
-    params,
-    router,
-    setImageConfig,
-    activeSession,
-    setActiveSession,
-    setLists
-  ]);
+  }, [params, user, session, router, setLists, setRanking]);
 
   useEffect(() => {
     async function retrieveTmdbConfig() {
@@ -89,12 +89,12 @@ export default function MyRanking({ params }) {
         movies
       }));
       saveLists({
-        user_id: activeSession.user.id,
+        user_id: user.id,
         ranking_slug: ranking.slug,
         lists: listsForDb
       });
     },
-    [activeSession, ranking]
+    [user, ranking]
   );
 
   const onMovieSelect = useCallback(
@@ -213,7 +213,7 @@ export default function MyRanking({ params }) {
     [lists, setLists, saveListsToDb, resetAlert]
   );
 
-  if (!activeSession || !ranking || !lists || !imageConfig) {
+  if (!ranking || !lists || !imageConfig) {
     return (
       <div className="text-center">
         <p>Loading...</p>
@@ -224,7 +224,7 @@ export default function MyRanking({ params }) {
   return (
     <div className="w-full sm:w-auto pt-[50px]">
       <MenuBar
-        username={activeSession.user.username}
+        username={session.user.username}
         onImportClick={() => setImportVisible(!importVisible)}
       />
       <AlertBox alert={alert} visible={alertVisible} />
