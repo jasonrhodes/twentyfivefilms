@@ -32,7 +32,7 @@ export default function useRankingForUser({ userId, username, rankingSlug }) {
     }
 
     retrieve();
-  }, [userId, rankingSlug, setLists, setRanking]);
+  }, [userId, username, rankingSlug, setLists, setRanking]);
 
   return { lists, ranking };
 }

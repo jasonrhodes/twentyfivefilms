@@ -37,7 +37,7 @@ export function AuthenticatedPage({ children, asyncParams, type }) {
     const isAdmin = session.user.role === 'ADMIN';
     logger.debug(`Logged in user role: ${session.user.role}`);
 
-    if (!isAdmin && type === 'session-path-match') {
+    if (type === 'session-path-match') {
       if (!user) {
         logger.debug(
           'Checking for session-path-match auth but user.username is not available yet'
