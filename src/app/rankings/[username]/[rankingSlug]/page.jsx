@@ -14,6 +14,7 @@ import {
 } from '@/lib/db';
 import { MenuBar } from '@/app/rankings/[username]/[rankingSlug]/components/MenuBar';
 import { PathAuthenticatedPage } from '@/components/AuthenticatedPage';
+import useTmdbImageConfig from '@/hooks/useTmdbImageConfig';
 
 export default function AuthRankingPage({ params: asyncParams }) {
   return (
@@ -34,10 +35,11 @@ function RankingPage({ params, user, session, router }) {
   const [lists, setLists] = useState(INITIAL_LISTS);
   const [ranking, setRanking] = useState(null);
   const [listForModal, setListForModal] = useState(null);
-  const [imageConfig, setImageConfig] = useState(null);
   const [alert, setAlert] = useState({});
   const [alertVisible, setAlertVisible] = useState(false);
   const [importVisible, setImportVisible] = useState(false);
+
+  const imageConfig = useTmdbImageConfig();
 
   useEffect(() => {
     async function retrieve() {
@@ -63,15 +65,6 @@ function RankingPage({ params, user, session, router }) {
 
     retrieve();
   }, [params, user, session, router, setLists, setRanking]);
-
-  useEffect(() => {
-    async function retrieveTmdbConfig() {
-      const config = await getTmdbConfig();
-      setImageConfig(config.images);
-    }
-
-    retrieveTmdbConfig();
-  }, [setImageConfig]);
 
   const resetAlert = useCallback(
     (newAlert) => {
