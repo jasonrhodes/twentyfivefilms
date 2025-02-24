@@ -215,10 +215,35 @@ function sortMoviesIntoLists(movies) {
   }, init);
 }
 
-export async function getListsForUserRanking({ user_id, ranking_slug }) {
+export async function getListsForUserRanking({
+  user_id,
+  username,
+  ranking_slug
+}) {
   logger.debug(
-    `Attempting to get lists for user ${user_id} for ranking ${ranking_slug} `
+    `Attempting to get lists for user ${user_id} / ${username} for ranking ${ranking_slug} `
   );
+
+  if (!user_id && !username) {
+    throw new Error(
+      'Must provide either user_id or username to get lists for user'
+    );
+  }
+
+  if (!user_id && username) {
+    const user = await prisma.user.findFirst({
+      where: {
+        username
+      }
+    });
+    if (!user) {
+      throw new Error(
+        `User not found for username ${username} while getting lists for ranking`
+      );
+    }
+    user_id = user.id;
+  }
+
   const movies = await prisma.listEntry.findMany({
     where: {
       user_id,
