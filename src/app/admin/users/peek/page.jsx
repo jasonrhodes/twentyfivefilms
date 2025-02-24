@@ -7,38 +7,39 @@ import useTmdbImageConfig from '@/hooks/useTmdbImageConfig';
 import { buildImageUrl } from '@/lib/buildImageUrl';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 export default function AuthAdminUserPeek({ params: asyncParams }) {
-  const searchParams = useSearchParams();
-  const username = searchParams.get('username');
-  const rankingSlug = searchParams.get('ranking');
   const imageConfig = useTmdbImageConfig();
 
   return (
     <AdminAuthenticatedPage asyncParams={asyncParams}>
       {({ session, params, router }) => {
-        if (!searchParams.has('username') || !searchParams.has('ranking')) {
-          return 'This page requires ?username=x&ranking=y';
-        }
         return (
-          <AdminUserPeek
-            session={session}
-            params={params}
-            username={username}
-            rankingSlug={rankingSlug}
-            router={router}
-            imageConfig={imageConfig}
-          />
+          <Suspense>
+            <AdminUserPeek
+              session={session}
+              params={params}
+              router={router}
+              imageConfig={imageConfig}
+            />
+          </Suspense>
         );
       }}
     </AdminAuthenticatedPage>
   );
 }
 
-function AdminUserPeek({ username, rankingSlug, imageConfig }) {
+function AdminUserPeek({ imageConfig }) {
   const [focusMovie, setFocusMovie] = useState(null);
+  const searchParams = useSearchParams();
+  const username = searchParams.get('username');
+  const rankingSlug = searchParams.get('ranking');
   const { ranking, lists } = useRankingForUser({ username, rankingSlug });
+
+  if (!searchParams.has('username') || !searchParams.has('ranking')) {
+    return 'This page requires ?username={username}&ranking={ranking-slug}';
+  }
 
   if (!ranking || !lists) {
     return null;

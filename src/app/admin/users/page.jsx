@@ -5,7 +5,6 @@ import { getAllUsers } from '@/lib/db';
 import { useState, useEffect } from 'react';
 import { BasicTable } from '@/components/BasicTable';
 import Link from 'next/link';
-import { Button } from '@/components/MaterialTailwind';
 import { IconLink } from '@tabler/icons-react';
 
 export default function AuthAdminUserListPage({ params: asyncParams }) {
