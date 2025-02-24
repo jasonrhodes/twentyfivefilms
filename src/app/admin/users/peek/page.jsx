@@ -46,37 +46,41 @@ function AdminUserPeek({ username, rankingSlug, imageConfig }) {
 
   return (
     <div>
-      <Link className="underline" href="/admin/users">
-        Back to all users
-      </Link>
-      <h1 className="text-xl">Admin View</h1>
-      <p>Ranking: {ranking.name}</p>
-      <p>User: {username}</p>
       {!focusMovie ? (
-        <div className="my-5">
-          <h2 className="font-bold text-lg mb-3">Favorites</h2>
-          <div className="flex flex-wrap gap-4 justify-start mb-5">
-            {lists.FAVORITE.map((film) => (
-              <MovieGridPoster
-                key={film.id}
-                movie={film}
-                size="sm"
-                imageConfig={imageConfig}
-                setFocus={setFocusMovie}
-              />
-            ))}
+        <div>
+          <div>
+            <Link className="underline" href="/admin/users">
+              Back to all users
+            </Link>
+            <h1 className="text-xl">Admin View</h1>
+            <p>Ranking: {ranking.name}</p>
+            <p>User: {username}</p>
           </div>
-          <h2 className="font-bold text-lg mb-3">Honorable Mentions</h2>
-          <div className="flex flex-wrap gap-2 justify-start">
-            {lists.HM.map((film) => (
-              <MovieGridPoster
-                key={film.id}
-                movie={film}
-                size="xs"
-                imageConfig={imageConfig}
-                setFocus={setFocusMovie}
-              />
-            ))}
+          <div className="my-5">
+            <h2 className="font-bold text-lg mb-3">Favorites</h2>
+            <div className="flex flex-wrap gap-4 justify-start mb-5">
+              {lists.FAVORITE.map((film) => (
+                <MovieGridPoster
+                  key={film.id}
+                  movie={film}
+                  size="sm"
+                  imageConfig={imageConfig}
+                  setFocus={setFocusMovie}
+                />
+              ))}
+            </div>
+            <h2 className="font-bold text-lg mb-3">Honorable Mentions</h2>
+            <div className="flex flex-wrap gap-2 justify-start">
+              {lists.HM.map((film) => (
+                <MovieGridPoster
+                  key={film.id}
+                  movie={film}
+                  size="xs"
+                  imageConfig={imageConfig}
+                  setFocus={setFocusMovie}
+                />
+              ))}
+            </div>
           </div>
         </div>
       ) : (
