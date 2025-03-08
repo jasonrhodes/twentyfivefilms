@@ -60,7 +60,6 @@ function Stats({ stats }) {
   });
   return (
     <div className="mb-5">
-      <h2>STATS</h2>
       <p>
         <b>Total users:</b> {stats.allUsers.length}
       </p>
