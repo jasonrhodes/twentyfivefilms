@@ -1,6 +1,14 @@
 'use server';
 
 import { MovieListType, PrismaClient } from '@prisma/client';
+import {
+  getAdminStatsQuery,
+  getAllTimeCountsPerUser,
+  getAllTimeMovies,
+  getUsersPerFavoriteStatsQuery,
+  getUsersPerHMStatsQuery,
+  getUsersPerMovieStatsQuery
+} from '@prisma/client/sql';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
 import * as logger from './logger';
@@ -339,4 +347,46 @@ export async function saveLists({ user_id, ranking_slug, lists }) {
     createdEntries,
     lists: sortMoviesIntoLists(createdEntries)
   };
+}
+
+export async function getAdminStats() {
+  const usersPerFavorite = await prisma.$queryRawTyped(
+    getUsersPerFavoriteStatsQuery()
+  );
+  const usersPerHM = await prisma.$queryRawTyped(getUsersPerHMStatsQuery());
+  const usersPerMovie = await prisma.$queryRawTyped(
+    getUsersPerMovieStatsQuery()
+  );
+  const allTimeCounts = await prisma.$queryRawTyped(getAllTimeCountsPerUser());
+  const allTimeMovies = await prisma.$queryRawTyped(getAllTimeMovies());
+  const allUsers = await prisma.user.findMany();
+
+  const result = {
+    ...usersPerFavorite[0],
+    ...usersPerHM[0],
+    ...usersPerMovie[0],
+    counts: allTimeCounts.map((row) => ({
+      ...row,
+      favorites: Number(row.favorites),
+      hms: Number(row.hms)
+    })),
+    movies: allTimeMovies.map((row) => ({
+      ...row,
+      favorite_count: Number(row.favorite_count),
+      hm_count: Number(row.hm_count),
+      total_count: Number(row.total_count)
+    })),
+    allUsers
+  };
+
+  // have to do all this nonsense because COUNT returns BigInt in PostGres
+  // and we can't pass BigInt values from server to client in NextJS
+  const keys = Object.keys(result);
+
+  return keys.reduce((acc, key) => {
+    const val = result[key];
+    const num = Number(val);
+    acc[key] = isNaN(num) ? val : num;
+    return acc;
+  }, {});
 }
