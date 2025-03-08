@@ -12,7 +12,7 @@ export function MenuBar({username, onImportClick, lists, ranking}) {
   const downloadCSV = () => {
     const dataForExport = [
       'Title,tmdbID',
-      ...[...lists.FAVORITE, ...lists.HM].map(movie => `${movie.title},${movie.id}`)
+      ...[...lists.FAVORITE, ...lists.HM].map(movie => `"${movie.title}",${movie.id}`)
     ].join('\r\n');
     const csvData = new Blob([dataForExport], { type: 'text/csv' });
     const csvURL = URL.createObjectURL(csvData);
