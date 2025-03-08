@@ -219,6 +219,8 @@ function RankingPage({ params, user, session, router }) {
       <MenuBar
         username={session.user.username}
         onImportClick={() => setImportVisible(!importVisible)}
+        lists={lists}
+        ranking={ranking}
       />
       <AlertBox alert={alert} visible={alertVisible} />
       <section className="text-center">
