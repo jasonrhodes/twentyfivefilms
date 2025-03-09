@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
-export function MenuBar({username, onImportClick}) {
+export function MenuBar({username, onImportClick, lists, ranking}) {
   const [hamburgerOpen, setHamburgerOpen] = useState(false);
 
   const handleImportClick = () => {
     setHamburgerOpen(false);
     onImportClick();
   }
+
+  const downloadCSV = () => {
+    const dataForExport = [
+      'Title,tmdbID',
+      ...[...lists.FAVORITE, ...lists.HM].map(movie => `"${movie.title}",${movie.id}`)
+    ].join('\r\n');
+    const csvData = new Blob([dataForExport], { type: 'text/csv' });
+    const csvURL = URL.createObjectURL(csvData);
+    const link = document.createElement('a');
+    link.href = csvURL;
+    link.download = `${ranking.name}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className={`fixed h-[50px] w-full top-0 left-0 z-10 bg-gray-900 flex items-center justify-center`}>
@@ -23,7 +38,7 @@ export function MenuBar({username, onImportClick}) {
             <path d="M4 18l16 0" />
           </svg>
         </div>
-        <div className={`sm:h-full sm:flex sm:pl-5 ${hamburgerOpen ? 'top-[48px] fixed h-[100px] flex flex-col bg-gray-800 border-b-2 border-gray-600' : 'hidden'}`}>
+        <div className={`sm:h-full sm:flex sm:pl-5 ${hamburgerOpen ? 'top-[48px] fixed h-[150px] flex flex-col bg-gray-800 border-b-2 border-gray-600' : 'hidden'}`}>
           <Link
             href={`/rankings/${username}`}
             className={"sm:text-center sm:align-middle text-gray-200 h-full p-3 hover:bg-gray-800 border-l-2 border-gray-800"}
@@ -32,12 +47,17 @@ export function MenuBar({username, onImportClick}) {
           </Link>
           <div
             onClick={handleImportClick}
-            className={"sm:text-center sm:align-middle text-gray-200 h-full p-3 hover:bg-gray-800 border-l-2 border-r-2 border-gray-800 cursor-pointer"}
+            className={"sm:text-center sm:align-middle text-gray-200 h-full p-3 hover:bg-gray-800 border-l-2 border-gray-800 cursor-pointer"}
           >
             Import From Letterboxd
           </div>
+          <div
+            onClick={downloadCSV}
+            className={"sm:text-center sm:align-middle text-gray-200 h-full p-3 hover:bg-gray-800 border-l-2 border-r-2 border-gray-800 cursor-pointer"}
+          >
+            Export to Letterboxd
+          </div>
         </div>
-
       </div>
     </div>
   );
