@@ -38,7 +38,7 @@ export function MenuBar({username, onImportClick, lists, ranking}) {
             <path d="M4 18l16 0" />
           </svg>
         </div>
-        <div className={`sm:h-full sm:flex sm:pl-5 ${hamburgerOpen ? 'top-[48px] fixed h-[100px] flex flex-col bg-gray-800 border-b-2 border-gray-600' : 'hidden'}`}>
+        <div className={`sm:h-full sm:flex sm:pl-5 ${hamburgerOpen ? 'top-[48px] fixed h-[150px] flex flex-col bg-gray-800 border-b-2 border-gray-600' : 'hidden'}`}>
           <Link
             href={`/rankings/${username}`}
             className={"sm:text-center sm:align-middle text-gray-200 h-full p-3 hover:bg-gray-800 border-l-2 border-gray-800"}
