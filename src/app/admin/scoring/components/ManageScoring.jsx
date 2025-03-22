@@ -28,7 +28,10 @@ export default function ManageScoring({
       <Dialog
         open={manageDialogOpen}
         handler={() => setManageDialogOpen(!manageDialogOpen)}>
-        <DialogHeader>Manage Scoring Multipliers</DialogHeader>
+        <DialogHeader>
+          <IconFunctionFilled size={32} />{' '}
+          <span className="pl-2">Manage Scoring Multipliers</span>
+        </DialogHeader>
         <DialogBody>
           <div className="mb-5">
             <Input

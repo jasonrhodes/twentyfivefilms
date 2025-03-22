@@ -28,7 +28,10 @@ export default function ManageFilters({
       <Dialog
         open={manageDialogOpen}
         handler={() => setManageDialogOpen(!manageDialogOpen)}>
-        <DialogHeader>Manage Filters</DialogHeader>
+        <DialogHeader>
+          <IconAdjustmentsHorizontal size={32} />{' '}
+          <span className="pl-2">Manage Filters</span>
+        </DialogHeader>
         <DialogBody>
           <div className="mb-5">
             <Input
