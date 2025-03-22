@@ -8,16 +8,17 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import ManageFilters from './components/ManageFilters';
 import { round } from '@/lib/round';
 import ManageScoring from './components/ManageScoring';
+import { MenuBar } from '@/components/MenuBar';
 
 export default function AuthAdminUserPeek({ params: asyncParams }) {
   const imageConfig = useTmdbImageConfig();
 
   return (
     <AdminAuthenticatedPage asyncParams={asyncParams}>
-      {() => {
+      {({ session }) => {
         return (
           <Suspense>
-            <AdminScoring imageConfig={imageConfig} />
+            <AdminScoring imageConfig={imageConfig} session={session} />
           </Suspense>
         );
       }}
@@ -25,15 +26,18 @@ export default function AuthAdminUserPeek({ params: asyncParams }) {
   );
 }
 
-function AdminScoring({ imageConfig }) {
+function AdminScoring({ imageConfig, session }) {
   const stats = useAdminStats();
+
+  console.log('PEEK SESSION', session);
 
   if (!stats) {
     return null;
   }
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full sm:w-auto pt-[50px]">
+      <MenuBar user={session.user} />
       <h1 className="mb-5">Scoring Sandbox</h1>
       <div>
         <Stats stats={stats} />

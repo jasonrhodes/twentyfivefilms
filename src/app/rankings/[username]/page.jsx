@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { IconStarFilled } from '@tabler/icons-react';
 import { PathAuthenticatedPage } from '@/components/AuthenticatedPage';
 import * as logger from '@/lib/logger';
+import { MenuBar } from '@/components/MenuBar';
 
 export default function AuthMyRankings({ params: asyncParams }) {
   return (
@@ -47,7 +48,8 @@ function MyRankings({ user, session }) {
   }
 
   return (
-    <div>
+    <div className="w-full sm:w-auto pt-[50px]">
+      <MenuBar user={session.user} />
       <section className="mb-3">
         <h1>Your Rankings</h1>
         <p className="text-sm">

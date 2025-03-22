@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { getTmdbConfig } from '@/lib/getTmdbConfig';
 import { AlertBox } from '@/components/AlertBox';
 import { MovieLists } from './components/MovieLists';
 import { ChooseMovieModal } from './components/ChooseMovieModal';
@@ -12,7 +11,7 @@ import {
   saveLists,
   getRankingDetailsFromSlug
 } from '@/lib/db';
-import { MenuBar } from '@/app/rankings/[username]/[rankingSlug]/components/MenuBar';
+import { MenuBar } from '@/components/MenuBar';
 import { PathAuthenticatedPage } from '@/components/AuthenticatedPage';
 import useTmdbImageConfig from '@/hooks/useTmdbImageConfig';
 
@@ -217,7 +216,7 @@ function RankingPage({ params, user, session, router }) {
   return (
     <div className="w-full sm:w-auto pt-[50px]">
       <MenuBar
-        username={session.user.username}
+        user={session.user}
         onImportClick={() => setImportVisible(!importVisible)}
         lists={lists}
         ranking={ranking}

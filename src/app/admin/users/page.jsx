@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { BasicTable } from '@/components/BasicTable';
 import Link from 'next/link';
 import { IconLink } from '@tabler/icons-react';
+import { MenuBar } from '@/components/MenuBar';
 
 export default function AuthAdminUserListPage({ params: asyncParams }) {
   return (
@@ -63,7 +64,8 @@ function AdminUserListPage({ params, user, session, router }) {
   ];
 
   return (
-    <div>
+    <div className="w-full sm:w-auto pt-[50px]">
+      <MenuBar user={session.user} />
       <h1>Admin Only: User List</h1>
       <BasicTable
         columns={columns}

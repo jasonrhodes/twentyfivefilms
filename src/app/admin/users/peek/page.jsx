@@ -2,6 +2,7 @@
 
 import { AdminAuthenticatedPage } from '@/components/AuthenticatedPage';
 import { Button, Typography } from '@/components/MaterialTailwind';
+import { MenuBar } from '@/components/MenuBar';
 import useRankingForUser from '@/hooks/useRankingForUser';
 import useTmdbImageConfig from '@/hooks/useTmdbImageConfig';
 import { buildImageUrl } from '@/lib/buildImageUrl';
@@ -30,7 +31,7 @@ export default function AuthAdminUserPeek({ params: asyncParams }) {
   );
 }
 
-function AdminUserPeek({ imageConfig }) {
+function AdminUserPeek({ imageConfig, session }) {
   const [focusMovie, setFocusMovie] = useState(null);
   const searchParams = useSearchParams();
   const username = searchParams.get('username');
@@ -46,13 +47,11 @@ function AdminUserPeek({ imageConfig }) {
   }
 
   return (
-    <div>
+    <div className="w-full sm:w-auto pt-[50px]">
+      <MenuBar user={session.user} />
       {!focusMovie ? (
         <div>
           <div>
-            <Link className="underline" href="/admin/users">
-              Back to all users
-            </Link>
             <h1 className="text-xl">Admin View</h1>
             <p>Ranking: {ranking.name}</p>
             <p>User: {username}</p>
