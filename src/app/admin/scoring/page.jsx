@@ -41,7 +41,7 @@ function AdminScoring({ imageConfig }) {
   }
 
   return (
-    <div className="flex flex-col max-w-full">
+    <div className="flex flex-col w-full">
       <h1 className="mb-5">Scoring Sandbox</h1>
       <div>
         <Stats stats={stats} />

@@ -93,7 +93,7 @@ export function BasicTable({
   setActiveSort
 }) {
   return (
-    <Card className="h-full w-full overflow-scroll">
+    <Card className="h-full w-full">
       <table className="w-full table-auto text-left max-w-full">
         <thead>
           <tr>
