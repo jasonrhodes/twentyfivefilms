@@ -29,8 +29,6 @@ export default function AuthAdminUserPeek({ params: asyncParams }) {
 function AdminScoring({ imageConfig, session }) {
   const stats = useAdminStats();
 
-  console.log('PEEK SESSION', session);
-
   if (!stats) {
     return null;
   }
@@ -107,10 +105,13 @@ function AllMovies({ allMovies, imageConfig }) {
 
   // apply scoring whenever score changes or filtered rows change
   useEffect(() => {
+    const DECIMAL_PLACES = 1;
     const scored = filteredRows.map((row) => {
-      const score =
+      const score = round(
         row.favorite_count * scoreMultipliers.favorite +
-        row.hm_count * scoreMultipliers.hm;
+          row.hm_count * scoreMultipliers.hm,
+        DECIMAL_PLACES
+      );
       return { ...row, score };
     });
     setScoredRows(scored);
@@ -201,6 +202,13 @@ function AllMovies({ allMovies, imageConfig }) {
         getRowKey={(row) => row.movie_id}
         activeSort={activeSort}
         setActiveSort={setActiveSort}
+        getClassesForRow={(row, rowIndex) => {
+          if (rowIndex === 63) {
+            return 'border-red-400 border-b-4';
+          } else {
+            return '';
+          }
+        }}
       />
     </>
   );
