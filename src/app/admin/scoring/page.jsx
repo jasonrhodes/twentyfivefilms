@@ -4,28 +4,21 @@ import { AdminAuthenticatedPage } from '@/components/AuthenticatedPage';
 import { BasicTable } from '@/components/BasicTable';
 import useAdminStats from '@/hooks/useAdminStats';
 import useTmdbImageConfig from '@/hooks/useTmdbImageConfig';
-import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import {
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter,
-  Button,
-  Checkbox,
-  Slider,
-  Input
-} from '@/components/MaterialTailwind';
+import ManageFilters from './components/ManageFilters';
+import { round } from '@/lib/round';
+import ManageScoring from './components/ManageScoring';
+import { MenuBar } from '@/components/MenuBar';
 
 export default function AuthAdminUserPeek({ params: asyncParams }) {
   const imageConfig = useTmdbImageConfig();
 
   return (
     <AdminAuthenticatedPage asyncParams={asyncParams}>
-      {() => {
+      {({ session }) => {
         return (
           <Suspense>
-            <AdminScoring imageConfig={imageConfig} />
+            <AdminScoring imageConfig={imageConfig} session={session} />
           </Suspense>
         );
       }}
@@ -33,7 +26,7 @@ export default function AuthAdminUserPeek({ params: asyncParams }) {
   );
 }
 
-function AdminScoring({ imageConfig }) {
+function AdminScoring({ imageConfig, session }) {
   const stats = useAdminStats();
 
   if (!stats) {
@@ -41,21 +34,17 @@ function AdminScoring({ imageConfig }) {
   }
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full sm:w-auto pt-[50px]">
+      <MenuBar user={session.user} />
       <h1 className="mb-5">Scoring Sandbox</h1>
       <div>
         <Stats stats={stats} />
       </div>
       <div>
-        <AllMovies allMovies={stats.movies} />
+        <AllMovies allMovies={stats.movies} imageConfig={imageConfig} />
       </div>
     </div>
   );
-}
-
-function round(number, places = 1) {
-  const multiplier = Math.pow(10, places);
-  return Math.round(number * multiplier) / multiplier;
 }
 
 function Stats({ stats }) {
@@ -82,14 +71,22 @@ function Stats({ stats }) {
   );
 }
 
-function AllMovies({ allMovies }) {
+function AllMovies({ allMovies, imageConfig }) {
   const [filteredRows, setFilteredRows] = useState([]);
+  const [scoredRows, setScoredRows] = useState([]);
   const [preparedRows, setPreparedRows] = useState([]);
   const [activeFilters, setActiveFilters] = useState({
     minFavorites: 0,
     minHMs: 0
   });
-  const [activeSort, setActiveSort] = useState({ column: null, dir: 'DESC' });
+  const [scoreMultipliers, setScoreMultipliers] = useState({
+    favorite: 2.5,
+    hm: 1
+  });
+  const [activeSort, setActiveSort] = useState({
+    column: 'score',
+    dir: 'DESC'
+  });
 
   // apply filters whenever active filters change or if allMovies changes
   useEffect(() => {
@@ -106,22 +103,36 @@ function AllMovies({ allMovies }) {
     }
   }, [activeFilters, allMovies]);
 
-  // apply sorting whenever active sort changes or if filtered rows change
+  // apply scoring whenever score changes or filtered rows change
   useEffect(() => {
-    if (filteredRows.length === 0) {
+    const DECIMAL_PLACES = 1;
+    const scored = filteredRows.map((row) => {
+      const score = round(
+        row.favorite_count * scoreMultipliers.favorite +
+          row.hm_count * scoreMultipliers.hm,
+        DECIMAL_PLACES
+      );
+      return { ...row, score };
+    });
+    setScoredRows(scored);
+  }, [scoreMultipliers, filteredRows]);
+
+  // apply sorting whenever active sort changes or if scored rows change
+  useEffect(() => {
+    if (scoredRows.length === 0) {
       return;
     }
     const { column, dir } = activeSort;
     if (!column) {
-      setPreparedRows(filteredRows);
+      setPreparedRows(scoredRows);
       return;
     }
-    const sorted = filteredRows.toSorted((a, b) => {
+    const sorted = scoredRows.toSorted((a, b) => {
       const aSmaller = a[column] < b[column];
       return dir === 'ASC' ? (aSmaller ? -1 : 1) : aSmaller ? 1 : -1;
     });
     setPreparedRows(sorted);
-  }, [activeSort, filteredRows]);
+  }, [activeSort, scoredRows]);
 
   const columns = useMemo(
     () => [
@@ -136,8 +147,27 @@ function AllMovies({ allMovies }) {
         sortable: true,
         cell: (row) => {
           const releaseDate = new Date(row.release_date);
-          return `${row.title} (${releaseDate.getFullYear()})`;
+          return (
+            <div className="flex align-middle">
+              <img
+                alt={row.title}
+                width={30}
+                className="mr-3"
+                src={
+                  imageConfig.secure_base_url +
+                  imageConfig.poster_sizes[0] +
+                  row.poster_path
+                }
+              />
+              <span className="flex flex-col justify-center">{`${row.title} (${releaseDate.getFullYear()})`}</span>
+            </div>
+          );
         }
+      },
+      {
+        key: 'score',
+        label: 'Score',
+        sortable: true
       },
       {
         key: 'favorite_count',
@@ -155,72 +185,31 @@ function AllMovies({ allMovies }) {
 
   return (
     <>
-      <ManageFilters
-        activeFilters={activeFilters}
-        setActiveFilters={setActiveFilters}
-      />
+      <div className="flex">
+        <ManageFilters
+          activeFilters={activeFilters}
+          setActiveFilters={setActiveFilters}
+          className="mr-3"
+        />
+        <ManageScoring
+          scoreMultipliers={scoreMultipliers}
+          setScoreMultipliers={setScoreMultipliers}
+        />
+      </div>
       <BasicTable
         columns={columns}
         rows={preparedRows}
         getRowKey={(row) => row.movie_id}
         activeSort={activeSort}
         setActiveSort={setActiveSort}
+        getClassesForRow={(row, rowIndex) => {
+          if (rowIndex === 63) {
+            return 'border-red-400 border-b-4';
+          } else {
+            return '';
+          }
+        }}
       />
-    </>
-  );
-}
-
-function ManageFilters({ activeFilters, setActiveFilters }) {
-  const [manageDialogOpen, setManageDialogOpen] = useState(false);
-  return (
-    <>
-      <div
-        className="flex cursor-pointer mb-2"
-        onClick={() => setManageDialogOpen(true)}>
-        <IconAdjustmentsHorizontal size={24} />
-        <span className="ml-1">Manage Filters</span>
-      </div>
-      <Dialog
-        open={manageDialogOpen}
-        handler={() => setManageDialogOpen(!manageDialogOpen)}>
-        <DialogHeader>Manage Filters</DialogHeader>
-        <DialogBody>
-          <div className="mb-5">
-            <Input
-              type="number"
-              label="Minimum Favorites Required"
-              value={activeFilters.minFavorites}
-              onChange={(e) =>
-                setActiveFilters({
-                  ...activeFilters,
-                  minFavorites: Number(e.target.value)
-                })
-              }
-            />
-          </div>
-          <div>
-            <Input
-              type="number"
-              label="Minimum HMs Required"
-              value={activeFilters.minHMs}
-              onChange={(e) =>
-                setActiveFilters({
-                  ...activeFilters,
-                  minHMs: Number(e.target.value)
-                })
-              }
-            />
-          </div>
-        </DialogBody>
-        <DialogFooter>
-          <Button
-            className="mr-1"
-            color="blue"
-            onClick={() => setManageDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogFooter>
-      </Dialog>
     </>
   );
 }

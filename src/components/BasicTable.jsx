@@ -89,6 +89,7 @@ export function BasicTable({
   columns,
   rows,
   getRowKey,
+  getClassesForRow,
   activeSort,
   setActiveSort
 }) {
@@ -111,7 +112,12 @@ export function BasicTable({
           {rows.map((row, rowIndex) => (
             <tr
               key={getRowKey ? getRowKey(row) : 'row-' + rowIndex}
-              className="even:bg-blue-gray-50/50">
+              className={[
+                'even:bg-blue-gray-50/50',
+                typeof getClassesForRow === 'function'
+                  ? getClassesForRow(row, rowIndex)
+                  : ''
+              ].join(' ')}>
               {columns.map((column, columnIndex) => (
                 <Cell
                   key={
