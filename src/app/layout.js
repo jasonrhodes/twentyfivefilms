@@ -3,6 +3,7 @@ import './globals.css';
 import { IconCopyright, IconHome } from '@tabler/icons-react';
 import Link from 'next/link';
 import React from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -23,8 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="p-[8px] sm:p-[32px] pb-20 min-h-svh font-[family-name:var(--font-geist-sans)] flex justify-between items-center flex-col">
           <main className="flex pb-20 items-center justify-center w-full lg:w-[960px]">
             {children}
@@ -39,6 +39,7 @@ export default function RootLayout({ children }) {
             </p>
           </footer>
         </div>
+        <SpeedInsights />
       </body>
     </html>
   );
