@@ -1,0 +1,56 @@
+name: Deploy to DO
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        # DATABASE_URL is required by Prisma schema but not used during build:
+        # prisma generate doesn't connect to the DB, and all app pages are
+        # dynamic (auth-gated), so next build never executes a DB query.
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
+
+      - name: Deploy
+        env:
+          DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
+          DO_HOST: ${{ secrets.DO_HOST }}
+          DO_USER: ${{ secrets.DO_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DO_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $DO_HOST >> ~/.ssh/known_hosts
+
+          rsync -az --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='.next/cache' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            ./ $DO_USER@$DO_HOST:/var/www/twentyfivefilms/
+
+          ssh -i ~/.ssh/deploy_key $DO_USER@$DO_HOST << 'ENDSSH'
+            cd /var/www/twentyfivefilms
+            npm ci
+            npx prisma migrate deploy
+            pm2 describe twentyfivefilms > /dev/null 2>&1 \
+              && pm2 restart twentyfivefilms \
+              || pm2 start npm --name twentyfivefilms -- start
+            pm2 save
+          ENDSSH

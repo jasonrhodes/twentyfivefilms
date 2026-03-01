@@ -3,8 +3,6 @@ import './globals.css';
 import { IconCopyright, IconHome } from '@tabler/icons-react';
 import Link from 'next/link';
 import React from 'react';
-import { SpeedInsights } from '@vercel/speed-insights/next';
-
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin']
