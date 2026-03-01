@@ -19,10 +19,11 @@ jobs:
         run: npm ci
 
       - name: Build
-        # DATABASE_URL is required by Prisma schema but not used during build:
-        # prisma generate doesn't connect to the DB, and all app pages are
-        # dynamic (auth-gated), so next build never executes a DB query.
-        run: npm run build
+        # prisma generate (without --sql) doesn't connect to the DB.
+        # prisma generate --sql does, so we skip it here and run it on the
+        # server during deploy where the real DB is available.
+        # All app pages are dynamic/auth-gated so next build never queries the DB.
+        run: npx prisma generate && npx next build
         env:
           DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
 
@@ -48,6 +49,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key $DO_USER@$DO_HOST << 'ENDSSH'
             cd /var/www/twentyfivefilms
             npm ci
+            npx prisma generate --sql
             npx prisma migrate deploy
             pm2 describe twentyfivefilms > /dev/null 2>&1 \
               && pm2 restart twentyfivefilms \
