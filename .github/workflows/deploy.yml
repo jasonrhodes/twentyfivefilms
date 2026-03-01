@@ -10,23 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        # prisma generate (without --sql) doesn't connect to the DB.
-        # prisma generate --sql does, so we skip it here and run it on the
-        # server during deploy where the real DB is available.
-        # All app pages are dynamic/auth-gated so next build never queries the DB.
-        run: npx prisma generate && npx next build
-        env:
-          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
-
       - name: Deploy
         env:
           DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
@@ -38,18 +21,20 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $DO_HOST >> ~/.ssh/known_hosts
 
+          # Rsync source to server (no node_modules, no .next, no .env)
           rsync -az --delete \
             --exclude='.git' \
             --exclude='node_modules' \
             --exclude='.env' \
-            --exclude='.next/cache' \
+            --exclude='.next' \
             -e "ssh -i ~/.ssh/deploy_key" \
             ./ $DO_USER@$DO_HOST:/var/www/twentyfivefilms/
 
+          # Build and restart on server (DB is available there for prisma generate --sql)
           ssh -i ~/.ssh/deploy_key $DO_USER@$DO_HOST << 'ENDSSH'
             cd /var/www/twentyfivefilms
             npm ci
-            npx prisma generate --sql
+            npm run build
             npx prisma migrate deploy
             pm2 describe twentyfivefilms > /dev/null 2>&1 \
               && pm2 restart twentyfivefilms \
