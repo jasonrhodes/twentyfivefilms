@@ -37,7 +37,6 @@ export default function RootLayout({ children }) {
             </p>
           </footer>
         </div>
-        <SpeedInsights />
       </body>
     </html>
   );
