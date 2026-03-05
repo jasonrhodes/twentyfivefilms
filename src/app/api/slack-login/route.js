@@ -8,7 +8,7 @@ export async function POST(req) {
   const userId = form.get('user_id');
   const username = form.get('user_name');
   const responseUrl = form.get('response_url');
-  const appBaseUrl = req.url.replace('/api/slack-login', '');
+  const appBaseUrl = process.env.APP_URL || req.url.replace('/api/slack-login', '');
 
   after(async () => {
     await logger.debug(() => [
