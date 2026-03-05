@@ -1,14 +1,6 @@
 'use server';
 
 import { MovieListType, PrismaClient } from '@prisma/client';
-import {
-  getAdminStatsQuery,
-  getAllTimeCountsPerUser,
-  getAllTimeMovies,
-  getUsersPerFavoriteStatsQuery,
-  getUsersPerHMStatsQuery,
-  getUsersPerMovieStatsQuery
-} from '@prisma/client/sql';
 import { createHmac } from 'crypto';
 import * as session from '@/lib/session';
 import * as logger from './logger';
@@ -350,15 +342,38 @@ export async function saveLists({ user_id, ranking_slug, lists }) {
 }
 
 export async function getAdminStats() {
-  const usersPerFavorite = await prisma.$queryRawTyped(
-    getUsersPerFavoriteStatsQuery()
-  );
-  const usersPerHM = await prisma.$queryRawTyped(getUsersPerHMStatsQuery());
-  const usersPerMovie = await prisma.$queryRawTyped(
-    getUsersPerMovieStatsQuery()
-  );
-  const allTimeCounts = await prisma.$queryRawTyped(getAllTimeCountsPerUser());
-  const allTimeMovies = await prisma.$queryRawTyped(getAllTimeMovies());
+  const usersPerFavorite = await prisma.$queryRawUnsafe(`
+    SELECT AVG(user_count) AS avg_users_per_favorite, MAX(user_count) AS max_users_per_favorite
+    FROM (SELECT movie_id, COUNT(user_id) AS user_count FROM "ListEntry" WHERE type = 'FAVORITE' GROUP BY movie_id) AS favorite_user_counts
+  `);
+  const usersPerHM = await prisma.$queryRawUnsafe(`
+    SELECT AVG(user_count) AS avg_users_per_hm, MAX(user_count) AS max_users_per_hm
+    FROM (SELECT movie_id, COUNT(user_id) AS user_count FROM "ListEntry" WHERE type = 'HM' GROUP BY movie_id) AS hm_user_counts
+  `);
+  const usersPerMovie = await prisma.$queryRawUnsafe(`
+    SELECT AVG(user_count) AS avg_users_per_movie, MAX(user_count) AS max_users_per_movie
+    FROM (SELECT movie_id, COUNT(user_id) AS user_count FROM "ListEntry" GROUP BY movie_id) AS movie_user_counts
+  `);
+  const allTimeCounts = await prisma.$queryRawUnsafe(`
+    SELECT le.user_id, u.username, u.slack_user_id, le.ranking_slug,
+      COUNT(CASE WHEN le.type = 'FAVORITE' THEN le.movie_id END) as favorites,
+      COUNT(CASE WHEN le.type = 'HM' THEN le.movie_id END) as hms
+    FROM "ListEntry" le
+    INNER JOIN "User" u ON u.id = le.user_id
+    WHERE le.ranking_slug = 'all-time'
+    GROUP BY le.user_id, le.ranking_slug, u.username, u.slack_user_id
+  `);
+  const allTimeMovies = await prisma.$queryRawUnsafe(`
+    SELECT e.movie_id, m.title, m.release_date, m.poster_path,
+      COUNT(CASE WHEN e.type = 'FAVORITE' THEN e.user_id END) AS favorite_count,
+      COUNT(CASE WHEN e.type = 'HM' THEN e.user_id END) AS hm_count,
+      COUNT(e.user_id) AS total_count
+    FROM "ListEntry" e
+    INNER JOIN "Movie" m ON e.movie_id = m.id
+    WHERE e.ranking_slug = 'all-time'
+    GROUP BY movie_id, m.title, m.release_date, m.poster_path
+    ORDER BY favorite_count DESC, hm_count DESC
+  `);
   const allUsers = await prisma.user.findMany();
 
   const result = {
