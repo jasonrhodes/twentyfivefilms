@@ -48,7 +48,7 @@ jobs:
             npm ci
             npx prisma migrate deploy
             pm2 describe twentyfivefilms > /dev/null 2>&1 \
-              && pm2 restart twentyfivefilms \
-              || pm2 start npm --name twentyfivefilms -- start
+              && PORT=3003 pm2 restart twentyfivefilms --update-env \
+              || PORT=3003 pm2 start npm --name twentyfivefilms -- start
             pm2 save
           ENDSSH
